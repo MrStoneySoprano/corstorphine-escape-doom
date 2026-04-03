@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Donation Confirmed — Corstorphine Escape Doom</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:  #0f2448;
+    --gold:  #c8920a;
+    --green: #0a9e56;
+    --red:   #d42035;
+    --bg:    #42424a;
+    --surface: #4e4e58;
+    --text:  #f4f0f0;
+    --dim:   #b0aab4;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 20px;
+    text-align: center;
+  }
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.006) 2px,rgba(255,255,255,0.006) 4px);
+    pointer-events:none;
+    z-index:1000;
+  }
+
+  .spinner {
+    font-size: 56px;
+    margin-bottom: 20px;
+    animation: spin 2s linear infinite;
+    display: block;
+  }
+  @keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+  .icon-success { font-size: 64px; margin-bottom: 16px; display: block; animation: pop 0.4s ease; }
+  @keyframes pop { 0%{transform:scale(0.5);opacity:0;} 100%{transform:scale(1);opacity:1;} }
+
+  h1 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 40px;
+    letter-spacing: 4px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  h1.success { color: var(--green); text-shadow: 0 0 20px rgba(10,158,86,0.4); }
+  h1.loading { color: var(--gold); }
+  h1.error   { color: var(--red); }
+
+  .sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--dim);
+    margin-bottom: 28px;
+    text-transform: uppercase;
+  }
+
+  .info-box {
+    background: rgba(26,58,107,0.5);
+    border: 1px solid var(--gold);
+    padding: 18px 20px;
+    max-width: 340px;
+    width: 100%;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+  .info-box-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .info-row {
+    display: flex;
+    gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    margin-bottom: 6px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .info-row span:first-child { color: var(--dim); min-width: 80px; flex-shrink: 0; }
+
+  .gift-aid-note {
+    background: rgba(10,158,86,0.1);
+    border: 1px solid rgba(10,158,86,0.35);
+    padding: 12px 14px;
+    max-width: 340px;
+    width: 100%;
+    margin-bottom: 24px;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.65;
+    text-align: left;
+    font-weight: 300;
+  }
+  .gift-aid-note strong { color: #6ef0a0; }
+
+  .btn-return {
+    background: var(--red);
+    border: none;
+    color: #fff;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    letter-spacing: 4px;
+    padding: 15px 0;
+    cursor: pointer;
+    width: 100%;
+    max-width: 340px;
+    transition: opacity 0.15s;
+    margin-bottom: 12px;
+    animation: pulse-btn 1.5s ease-in-out infinite;
+  }
+  .btn-return:hover, .btn-return:active { opacity: 0.85; }
+  @keyframes pulse-btn {
+    0%,100%{ box-shadow: 0 0 0 0 rgba(212,32,53,0.4); }
+    50%    { box-shadow: 0 0 0 8px rgba(212,32,53,0); }
+  }
+  .countdown-note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+  .countdown-note span { color: var(--red); font-size: 13px; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div id="loading-state">
+  <span class="spinner">⚽</span>
+  <h1 class="loading">CONFIRMING DONATION</h1>
+  <div class="sub">// CONNECTING TO JUSTGIVING</div>
+</div>
+
+<div id="success-state" style="display:none; flex-direction:column; align-items:center; width:100%;">
+  <span class="icon-success">✅</span>
+  <h1 class="success">DONATION CONFIRMED</h1>
+  <div class="sub">// CORSTORPHINE DYNAMO FC · THANK YOU</div>
+
+  <div class="info-box">
+    <div class="info-box-label">// DONATION DETAILS</div>
+    <div class="info-row"><span>AMOUNT:</span><span id="display-amount">—</span></div>
+    <div class="info-row"><span>TIER:</span><span id="display-tier">—</span></div>
+    <div class="info-row"><span>CHARITY:</span><span>Corstorphine Dynamo FC</span></div>
+    <div class="info-row"><span>CAUSE:</span><span>Tall Oaks 3G Pitch Appeal</span></div>
+    <div class="info-row" id="donation-id-row" style="display:none;">
+      <span>REF:</span><span id="display-ref">—</span>
+    </div>
+  </div>
+
+  <div class="gift-aid-note">
+    🏛 <strong>If you ticked Gift Aid on JustGiving's form</strong>, Corstorphine Dynamo FC will receive an extra 25% from HMRC — at no additional cost to you. JustGiving will email you a receipt confirming your donation and Gift Aid declaration.
+  </div>
+
+  <button class="btn-return" onclick="returnToGame()">💣 BACK TO THE MISSION</button>
+  <div class="countdown-note">Auto-returning in <span id="auto-timer">5</span>s…</div>
+</div>
+
+<div id="error-state" style="display:none; flex-direction:column; align-items:center; width:100%;">
+  <span style="font-size:52px;margin-bottom:16px;">⚠️</span>
+  <h1 class="error">SOMETHING WENT WRONG</h1>
+  <div class="sub">// PLEASE TRY AGAIN</div>
+  <p style="font-size:13px;color:var(--dim);max-width:300px;line-height:1.7;margin-bottom:24px;font-weight:300;">
+    We couldn't confirm your donation. If you completed payment on JustGiving, your donation was still received — check your email for a JustGiving receipt.<br><br>
+    You can return to the mission and your progress will still be saved.
+  </p>
+  <button class="btn-return" onclick="returnToGame()">← RETURN TO MISSION</button>
+</div>
+
+<script>
+// ─── Configuration ────────────────────────────────────────────────────────
+const GAME_URL  = 'https://mrstoneysoprano.github.io/corstorphine-escape-doom/';
+const TIER_INFO = {
+  agent:     { label:'⚡ Agent',     amount:'£3.00', giftAid:'£3.75'  },
+  supporter: { label:'🏆 Supporter', amount:'£5.00', giftAid:'£6.25'  },
+  champion:  { label:'🌟 Champion',  amount:'£10.00',giftAid:'£12.50' }
+};
+
+// ─── Read URL parameters from JustGiving redirect ─────────────────────────
+const params   = new URLSearchParams(window.location.search);
+const status   = params.get('donation');      // 'success' from our exiturl
+const tier     = params.get('tier') || 'supporter';
+const jgDonId  = params.get('jgDonationId'); // populated by JustGiving
+
+// ─── Update game state in localStorage ───────────────────────────────────
+function unlockMission() {
+  try {
+    const raw   = localStorage.getItem('ced_state');
+    const state = raw ? JSON.parse(raw) : {};
+    state.hasPaid       = true;
+    state.donationTier  = tier;
+    state.jgDonationId  = jgDonId || '';
+    state.pendingPayment= false;
+    localStorage.setItem('ced_state', JSON.stringify(state));
+  } catch(e) {
+    // localStorage unavailable — game will handle gracefully on return
+  }
+}
+
+// ─── Display logic ─────────────────────────────────────────────────────────
+function showSuccess() {
+  document.getElementById('loading-state').style.display = 'none';
+  const s = document.getElementById('success-state');
+  s.style.display = 'flex';
+
+  const info = TIER_INFO[tier] || TIER_INFO.supporter;
+  document.getElementById('display-tier').textContent   = info.label;
+  document.getElementById('display-amount').textContent = `${info.amount} (${info.giftAid} with Gift Aid)`;
+
+  if (jgDonId && jgDonId !== 'JUSTGIVING-DONATION-ID') {
+    document.getElementById('donation-id-row').style.display = 'flex';
+    document.getElementById('display-ref').textContent = jgDonId;
+  }
+}
+
+function showError() {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('error-state').style.display   = 'flex';
+}
+
+function returnToGame() {
+  window.location.href = GAME_URL + '?donation=success&tier=' + encodeURIComponent(tier)
+    + (jgDonId ? '&jgDonationId=' + encodeURIComponent(jgDonId) : '');
+}
+
+// ─── Auto-return countdown ─────────────────────────────────────────────────
+let autoSecs = 5;
+function startCountdown() {
+  const el = document.getElementById('auto-timer');
+  const t  = setInterval(() => {
+    autoSecs--;
+    if (el) el.textContent = autoSecs;
+    if (autoSecs <= 0) { clearInterval(t); returnToGame(); }
+  }, 1000);
+}
+
+// ─── Entry point ───────────────────────────────────────────────────────────
+if (status === 'success') {
+  unlockMission();
+  setTimeout(() => {
+    showSuccess();
+    startCountdown();
+  }, 1200); // brief loading pause for polish
+} else {
+  setTimeout(showError, 1000);
+}
+</script>
+</body>
+</html>
