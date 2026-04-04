@@ -975,13 +975,6 @@ function redirectToJustGiving(tier, amount) {
 
   window.location.href = jgUrl;
 }
-    + `&exiturl=${returnUrl}`
-    + `&reference=${ref}`
-    + `&message=${msg}`;
-
-  window.location.href = jgUrl;
-}
-
 function showJGFallback(tier, amount) {
   const ol = document.getElementById('jg-overlay');
   if (ol) ol.remove();
