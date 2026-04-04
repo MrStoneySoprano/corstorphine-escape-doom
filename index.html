@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Corstorphine Escape Doom</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@300;400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  /* ══════════════════════════════════════════
+     CORSTORPHINE DYNAMO FC — BRAND STYLESHEET
+     Navy #0f2a5a · Sky #5ab4e0 · Gold #f5c842
+     Light backgrounds, dark text, club colours
+  ══════════════════════════════════════════ */
+  :root {
+    --navy:         #0f2a5a;
+    --navy2:        #1a3e80;
+    --sky:          #5ab4e0;
+    --sky2:         #88ccee;
+    --gold:         #f5c842;
+    --gold2:        #d4a820;
+    --red:          #c8203a;
+    --red-dim:      #9e1a2e;
+    --red-glow:     rgba(200,32,58,0.3);
+    --amber:        #d4a820;
+    --amber-glow:   rgba(212,168,32,0.3);
+    --green:        #1a8040;
+    --green-dim:    #146030;
+    --bg:           #f0f5fa;
+    --surface:      #ffffff;
+    --surface2:     #e4eef7;
+    --border:       #c0d8ee;
+    --border-hot:   #5ab4e0;
+    --text:         #0f2a5a;
+    --text-dim:     #4a6888;
+    --text-inv:     #ffffff;
+    --dynamo-navy:  #0f2a5a;
+    --dynamo-sky:   #5ab4e0;
+    --dynamo-gold:  #f5c842;
+    --dynamo-blue:  #0f2a5a;
+    --dynamo-gold2: #d4a820;
+    --scanline:     rgba(90,180,224,0.018);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body { background:var(--bg); color:var(--text); font-family:'Roboto Condensed',sans-serif; min-height:100vh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 3px,var(--scanline) 3px,var(--scanline) 4px); pointer-events:none; z-index:1000; }
+
+  .screen { display:none; min-height:100vh; flex-direction:column; }
+  .screen.active { display:flex; }
+
+  /* ── HERO IMAGE ── */
+  .hero-wrap { position:relative; width:100%; flex-shrink:0; overflow:hidden; }
+  .hero-img  { width:100%; height:220px; object-fit:cover; object-position:center; display:block; filter:brightness(0.82) contrast(1.05); }
+  .hero-img.tall { height:260px; filter:brightness(0.55) contrast(1.1) saturate(0.75); }
+  .hero-img.med  { height:180px; filter:brightness(0.6) saturate(0.8); }
+  .hero-overlay  { position:absolute; inset:0; background:linear-gradient(to bottom,rgba(15,42,90,0.05),rgba(15,42,90,0.65)); }
+  .hero-caption  { position:absolute; bottom:12px; left:14px; right:14px; }
+  .hero-title    { font-family:'Oswald',sans-serif; font-size:22px; letter-spacing:3px; color:#fff; text-shadow:0 1px 6px rgba(0,0,0,0.7); line-height:1.1; }
+  .hero-sub      { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; color:rgba(255,255,255,0.75); margin-top:3px; display:block; }
+  .hero-diff     { position:absolute; top:10px; right:12px; font-family:'Share Tech Mono',monospace; font-size:9px; padding:3px 9px; border:1px solid; letter-spacing:1px; background:rgba(255,255,255,0.15); backdrop-filter:blur(4px); }
+  .diff-easy     { color:#ffffff; border-color:rgba(255,255,255,0.6); background:rgba(26,128,64,0.7)!important; }
+  .diff-medium   { color:#ffffff; border-color:rgba(255,255,255,0.6); background:rgba(212,168,32,0.7)!important; }
+  .diff-hard     { color:#ffffff; border-color:rgba(255,255,255,0.6); background:rgba(200,32,58,0.7)!important; }
+
+  /* ── BOOT ── */
+  #boot { overflow-y:auto; }
+  .boot-body { padding:20px 20px 36px; display:flex; flex-direction:column; align-items:center; background:var(--bg); }
+
+  /* Dynamo info strip */
+  .dynamo-strip { width:100%; max-width:340px; background:var(--navy); border-left:4px solid var(--sky); padding:10px 14px; margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+  .dynamo-strip-text { font-size:12px; color:#fff; line-height:1.5; }
+  .dynamo-strip-text strong { color:var(--gold); }
+  .dynamo-logo { font-size:26px; flex-shrink:0; }
+
+  .alert-box   { border:1px solid var(--sky); background:rgba(90,180,224,0.08); padding:14px 16px; margin-bottom:16px; width:100%; max-width:340px; border-radius:2px; }
+  .alert-label { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--navy); letter-spacing:3px; margin-bottom:8px; }
+  .alert-text  { font-size:13px; color:var(--text); line-height:1.7; font-weight:400; }
+  .alert-text strong { color:var(--navy); font-weight:700; }
+
+  .stat-row { display:flex; margin-bottom:18px; border:2px solid var(--navy); width:100%; max-width:340px; overflow:hidden; border-radius:2px; }
+  .stat { flex:1; padding:12px 8px; text-align:center; border-right:1px solid var(--border); background:var(--surface); }
+  .stat:last-child { border-right:none; }
+  .stat-val { font-family:'Oswald',sans-serif; font-size:22px; color:var(--navy); letter-spacing:1px; font-weight:700; }
+  .stat-lbl { font-family:'Share Tech Mono',monospace; font-size:8px; color:var(--text-dim); letter-spacing:1px; margin-top:2px; }
+
+  /* ── BUTTONS ── */
+  .btn-primary { background:var(--navy); border:2px solid var(--navy); color:#fff; font-family:'Oswald',sans-serif; font-size:20px; letter-spacing:3px; padding:14px 0; cursor:pointer; width:100%; max-width:340px; transition:all 0.15s; font-weight:600; }
+  .btn-primary:active { background:var(--navy2); }
+  .btn-secondary { background:transparent; border:1px solid var(--border); color:var(--text-dim); font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:2px; padding:11px 0; cursor:pointer; width:100%; max-width:340px; margin-top:10px; transition:all 0.15s; }
+  .btn-secondary:active { border-color:var(--navy); color:var(--navy); }
+
+  /* ── REGISTER / LOGIN ── */
+  #register, #login { animation:slideUp 0.35s ease; overflow-y:auto; background:var(--bg); }
+  .screen-header { background:var(--navy); border-bottom:3px solid var(--sky); padding:16px 20px 12px; position:sticky; top:0; z-index:10; }
+  .screen-label  { font-family:'Share Tech Mono',monospace; font-size:9px; color:rgba(90,180,224,0.8); letter-spacing:3px; margin-bottom:3px; }
+  .screen-title  { font-family:'Oswald',sans-serif; font-size:26px; letter-spacing:3px; color:#fff; font-weight:700; }
+  .scroll-body   { overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch; }
+  .form-body     { padding:22px 20px; background:var(--bg); }
+
+  .field { margin-bottom:20px; }
+  .field label { display:block; font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--navy); margin-bottom:7px; text-transform:uppercase; font-weight:600; }
+  .field input  { width:100%; background:var(--surface); border:1px solid var(--border); border-bottom:2px solid var(--sky); color:var(--text); font-family:'Share Tech Mono',monospace; font-size:16px; padding:11px 13px; outline:none; transition:border-color 0.2s; -webkit-appearance:none; border-radius:0; }
+  .field input:focus { border-bottom-color:var(--navy); border-color:var(--sky); }
+  .field input::placeholder { color:var(--text-dim); }
+  .field-hint { font-size:11px; color:var(--text-dim); margin-top:5px; font-style:italic; }
+  .error-msg  { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--red); margin-top:5px; min-height:15px; }
+  .terms { font-size:12px; color:var(--text-dim); line-height:1.65; margin-bottom:22px; padding:12px 14px; border:1px solid var(--border); background:var(--surface); border-left:3px solid var(--sky); }
+  .terms span { color:var(--navy); font-weight:700; }
+
+  /* ── CLUE SCREEN ── */
+  #clues { animation:slideUp 0.3s ease; background:var(--bg); }
+  .clue-header { background:var(--navy); border-bottom:3px solid var(--sky); padding:12px 18px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:10; }
+  .agent-tag { font-family:'Share Tech Mono',monospace; font-size:10px; color:rgba(255,255,255,0.65); }
+  .agent-tag span { color:var(--gold); font-weight:600; }
+  .clue-prog-wrap { background:var(--border); height:4px; flex-shrink:0; }
+  .clue-prog-fill { height:100%; background:var(--sky); transition:width 0.5s ease; }
+  .clue-body-text { font-size:14px; line-height:1.8; color:var(--text); font-weight:400; padding:16px 18px 0; white-space:pre-line; }
+  .key-collected  { margin:12px 16px 0; padding:10px 14px; background:rgba(26,128,64,0.1); border:1px solid rgba(26,128,64,0.4); font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--green); letter-spacing:1px; }
+  .key-collected strong { color:var(--navy); }
+  .hint-panel { margin:12px 16px 0; padding:12px 14px; background:rgba(245,200,66,0.1); border:1px solid rgba(212,168,32,0.4); border-left:3px solid var(--gold); display:none; }
+  .hint-label { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--amber); letter-spacing:3px; margin-bottom:6px; }
+  .hint-body  { font-size:12px; color:var(--text); line-height:1.65; }
+  .answer-wrap { padding:14px 16px 28px; background:var(--bg); }
+  .answer-lbl  { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:2px; margin-bottom:8px; text-transform:uppercase; }
+  .answer-input { width:100%; background:var(--surface); border:1px solid var(--border); border-bottom:2px solid var(--sky); color:var(--text); font-family:'Share Tech Mono',monospace; font-size:16px; padding:11px 13px; outline:none; -webkit-appearance:none; border-radius:0; transition:border-color 0.2s; text-transform:uppercase; }
+  .answer-input:focus { border-bottom-color:var(--navy); border-color:var(--sky); }
+  .answer-feedback { font-family:'Share Tech Mono',monospace; font-size:11px; margin-top:7px; min-height:16px; letter-spacing:1px; }
+  .fb-ok  { color:var(--green); }
+  .fb-bad { color:var(--red); }
+  .btn-row { display:flex; gap:10px; margin-top:12px; }
+  .btn-submit { flex:1; background:var(--navy); border:none; color:#fff; font-family:'Oswald',sans-serif; font-size:18px; letter-spacing:3px; padding:13px; cursor:pointer; transition:opacity 0.15s; font-weight:600; }
+  .btn-submit:active { background:var(--navy2); }
+  .btn-hint { background:transparent; border:2px solid var(--gold); color:var(--navy); font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px; padding:13px 14px; cursor:pointer; font-weight:600; }
+  .btn-hint:active { background:var(--gold); }
+
+  /* ── PAYWALL ── */
+  #paywall { overflow-y:auto; animation:fadeIn 0.4s ease; background:var(--bg); }
+  .cause-banner { background:var(--navy); border-bottom:3px solid var(--sky); padding:16px 20px; text-align:center; }
+  .cause-banner-title { font-family:'Oswald',sans-serif; font-size:22px; letter-spacing:3px; color:#fff; margin-bottom:4px; font-weight:700; }
+  .cause-banner-sub   { font-family:'Roboto Condensed',sans-serif; font-size:13px; color:rgba(255,255,255,0.75); line-height:1.5; }
+  .cause-banner-sub strong { color:var(--gold); }
+  .cause-stats { display:flex; border-bottom:1px solid var(--border); background:var(--navy2); }
+  .cause-stat  { flex:1; padding:10px 8px; text-align:center; border-right:1px solid rgba(90,180,224,0.25); }
+  .cause-stat:last-child { border-right:none; }
+  .cause-stat-val { font-family:'Oswald',sans-serif; font-size:22px; color:var(--gold); font-weight:700; }
+  .cause-stat-lbl { font-family:'Share Tech Mono',monospace; font-size:8px; color:rgba(255,255,255,0.55); letter-spacing:1px; }
+  .paywall-body { padding:18px 18px 28px; display:flex; flex-direction:column; align-items:center; background:var(--bg); }
+  .momentum-msg { width:100%; max-width:340px; background:var(--navy); border-left:4px solid var(--sky); padding:14px 16px; margin-bottom:16px; }
+  .momentum-msg-title { font-family:'Oswald',sans-serif; font-size:18px; letter-spacing:2px; color:var(--sky); margin-bottom:6px; font-weight:700; }
+  .momentum-msg-text  { font-size:13px; color:#fff; line-height:1.6; font-weight:300; }
+  .momentum-msg-text strong { color:var(--gold); }
+
+  /* Tier cards */
+  .tier-heading { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:3px; margin-bottom:10px; text-align:center; }
+  .tier-cards   { display:flex; flex-direction:column; gap:10px; width:100%; max-width:340px; margin-bottom:16px; }
+  .tier-card { border:2px solid var(--border); background:var(--surface); padding:14px 16px; cursor:pointer; transition:all 0.15s; position:relative; text-align:left; width:100%; border-radius:2px; }
+  .tier-card:active { transform:scale(0.98); background:var(--surface2); }
+  .tier-card.popular { border-color:var(--navy); background:rgba(15,42,90,0.04); }
+  .popular-badge { position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--navy); color:#fff; font-family:'Oswald',sans-serif; font-size:12px; letter-spacing:2px; padding:2px 12px; white-space:nowrap; }
+  .tier-row  { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
+  .tier-name { font-family:'Oswald',sans-serif; font-size:20px; letter-spacing:2px; color:var(--navy); font-weight:700; }
+  .tier-price { font-family:'Oswald',sans-serif; font-size:28px; color:var(--navy); font-weight:700; }
+  .tier-card.popular .tier-price { color:var(--sky); }
+  .tier-desc { font-size:12px; color:var(--text-dim); line-height:1.5; }
+  .tier-perks { margin-top:8px; display:flex; flex-wrap:wrap; gap:4px; }
+  .tier-perk  { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-dim); background:var(--surface2); padding:2px 7px; border:1px solid var(--border); }
+  .gift-aid-perk { background:rgba(245,200,66,0.15)!important; border-color:rgba(212,168,32,0.5)!important; color:var(--amber)!important; }
+
+  /* Gift Aid box */
+  .gift-aid-box { width:100%; max-width:340px; background:var(--navy); border:2px solid var(--gold); padding:14px; margin-bottom:16px; border-radius:2px; }
+  .gift-aid-header { display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; }
+  .gift-aid-icon { font-size:22px; flex-shrink:0; }
+  .gift-aid-title { font-family:'Oswald',sans-serif; font-size:15px; letter-spacing:2px; color:var(--gold); line-height:1.2; font-weight:700; }
+  .gift-aid-sub   { font-family:'Share Tech Mono',monospace; font-size:9px; color:rgba(255,255,255,0.55); letter-spacing:1px; margin-top:3px; }
+  .gift-aid-examples { margin-bottom:10px; }
+  .ga-row { display:flex; align-items:center; gap:8px; padding:6px 8px; font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(255,255,255,0.6); border-bottom:1px solid rgba(245,200,66,0.15); }
+  .ga-row:last-child { border-bottom:none; }
+  .ga-row.ga-popular { background:rgba(245,200,66,0.1); color:#fff; }
+  .ga-tier  { min-width:80px; }
+  .ga-arrow { color:var(--gold); }
+  .ga-total strong { color:var(--gold); }
+  .gift-aid-note { font-family:'Share Tech Mono',monospace; font-size:9px; color:rgba(255,255,255,0.4); line-height:1.6; border-top:1px solid rgba(245,200,66,0.2); padding-top:8px; margin-top:4px; }
+  .loss-aversion { width:100%; max-width:340px; font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); text-align:center; margin-bottom:14px; line-height:1.6; background:rgba(200,32,58,0.06); padding:8px; border:1px solid rgba(200,32,58,0.2); }
+  .loss-aversion span { color:var(--red); font-weight:700; }
+  .jg-trust-row { display:flex; flex-direction:column; align-items:center; margin-bottom:12px; padding:12px 14px; background:var(--navy); border-radius:2px; max-width:340px; width:100%; text-align:center; }
+  .jg-trust-text { font-family:'Share Tech Mono',monospace; font-size:9px; color:rgba(255,255,255,0.5); line-height:1.7; }
+
+  /* ── BOMB ARMED ── */
+  #bomb-armed { overflow-y:auto; animation:fadeIn 0.3s ease; background:var(--navy); }
+  .bomb-body  { padding:18px 20px 28px; display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--navy); }
+  .armed-sub  { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:3px; color:rgba(90,180,224,0.6); margin-bottom:18px; }
+  .countdown-display { font-family:'Share Tech Mono',monospace; font-size:68px; color:var(--sky); letter-spacing:4px; line-height:1; margin-bottom:6px; font-weight:bold; }
+  .countdown-display.warning  { color:var(--gold); }
+  .countdown-display.critical { animation:crit-flash 0.3s step-end infinite; }
+  @keyframes crit-flash { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  .countdown-label { font-family:'Share Tech Mono',monospace; font-size:10px; color:rgba(90,180,224,0.55); letter-spacing:3px; margin-bottom:18px; }
+  .armed-instructions { background:rgba(255,255,255,0.06); border:1px solid rgba(90,180,224,0.3); border-left:3px solid var(--sky); padding:16px; max-width:340px; width:100%; text-align:left; margin-bottom:20px; }
+  .armed-instr-lbl { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--sky); letter-spacing:3px; margin-bottom:10px; }
+  .instr-step { display:flex; gap:12px; margin-bottom:10px; font-size:13px; color:rgba(255,255,255,0.85); line-height:1.55; font-weight:300; }
+  .instr-num  { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--sky); min-width:20px; font-weight:bold; margin-top:1px; }
+  .btn-primary-armed { background:var(--sky); border:none; color:var(--navy); font-family:'Oswald',sans-serif; font-size:20px; letter-spacing:3px; padding:15px 0; cursor:pointer; width:100%; max-width:340px; font-weight:700; transition:opacity 0.15s; }
+  .btn-primary-armed:active { opacity:0.85; }
+
+  /* ── GATE QUIZ ── */
+  #gate-quiz { flex-direction:column; animation:slideUp 0.3s ease; background:var(--bg); }
+  #wire-cut  { flex-direction:column; animation:slideUp 0.3s ease; background:var(--bg); }
+  .gate-header { background:var(--navy); border-bottom:3px solid var(--sky); padding:12px 18px; position:sticky; top:0; z-index:20; flex-shrink:0; }
+  .gate-timer-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .gate-title-lbl { font-family:'Oswald',sans-serif; font-size:20px; letter-spacing:3px; color:#fff; font-weight:700; }
+  .gate-countdown { font-family:'Share Tech Mono',monospace; font-size:28px; color:var(--sky); letter-spacing:2px; font-weight:bold; }
+  .gate-countdown.warning  { color:var(--gold); }
+  .gate-countdown.critical { animation:crit-flash 0.3s step-end infinite; color:var(--red); }
+  .gate-progress      { height:4px; background:rgba(255,255,255,0.2); }
+  .gate-progress-fill { height:100%; background:var(--sky); transition:width 0.4s; }
+  .quiz-hero-img  { width:100%; height:130px; object-fit:cover; object-position:center; display:block; border-bottom:3px solid var(--sky); flex-shrink:0; }
+  .quiz-q-label   { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:2px; padding:10px 18px 4px; }
+  .quiz-q-label span { color:var(--navy); font-weight:700; }
+  .quiz-card      { margin:0 14px 10px; background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--sky); padding:14px; box-shadow:0 2px 8px rgba(15,42,90,0.08); }
+  .quiz-q-text    { font-size:14px; line-height:1.65; color:var(--text); margin-bottom:12px; font-weight:400; }
+  .quiz-options   { display:flex; flex-direction:column; gap:8px; }
+  .quiz-opt       { background:var(--surface2); border:2px solid var(--border); color:var(--text); font-family:'Share Tech Mono',monospace; font-size:13px; padding:12px 13px; cursor:pointer; text-align:left; transition:all 0.15s; display:flex; align-items:center; gap:10px; border-radius:2px; }
+  .quiz-opt:active { background:rgba(15,42,90,0.1); border-color:var(--navy); }
+  .quiz-opt.selected-correct { background:rgba(26,128,64,0.12); border-color:var(--green); color:var(--green); pointer-events:none; }
+  .quiz-opt.selected-wrong   { background:rgba(200,32,58,0.1); border-color:var(--red); color:var(--red); pointer-events:none; }
+  .quiz-opt.reveal-correct   { border-color:var(--green); color:var(--green); pointer-events:none; }
+  .quiz-opt.disabled         { pointer-events:none; opacity:0.5; }
+  .opt-letter { font-family:'Oswald',sans-serif; font-size:16px; color:var(--navy); min-width:18px; font-weight:700; }
+  .quiz-feedback { font-family:'Share Tech Mono',monospace; font-size:11px; padding:8px 18px; min-height:28px; letter-spacing:1px; }
+  .quiz-feedback.ok  { color:var(--green); }
+  .quiz-feedback.bad { color:var(--red); }
+
+  /* ── DETONATION ── */
+  #detonation { overflow-y:auto; animation:fadeIn 0.2s ease; background:var(--bg); }
+  .det-body { padding:24px 20px 36px; display:flex; flex-direction:column; align-items:center; text-align:center; width:100%; }
+  .det-title { font-family:'Oswald',sans-serif; font-size:46px; letter-spacing:4px; color:var(--red); margin-bottom:6px; font-weight:700; }
+  .det-sub   { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:3px; margin-bottom:24px; }
+  .det-score { background:var(--surface); border:2px solid var(--navy); padding:16px 24px; margin-bottom:20px; max-width:300px; width:100%; box-shadow:0 2px 12px rgba(15,42,90,0.1); }
+  .det-score-lbl { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:2px; margin-bottom:8px; }
+  .det-score-val { font-family:'Oswald',sans-serif; font-size:40px; color:var(--red); font-weight:700; }
+
+  /* ── DEFUSED ── */
+  #defused { overflow-y:auto; animation:fadeIn 0.4s ease; background:var(--bg); }
+  .win-body { padding:24px 20px 36px; display:flex; flex-direction:column; align-items:center; text-align:center; width:100%; }
+  .win-ring { width:90px; height:90px; border:4px solid var(--green); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:40px; animation:win-pulse 2s ease-in-out infinite; box-shadow:0 0 30px rgba(26,128,64,0.3); margin-bottom:12px; }
+  @keyframes win-pulse { 0%,100%{ box-shadow:0 0 15px rgba(26,128,64,0.2); } 50%{ box-shadow:0 0 40px rgba(26,128,64,0.5); } }
+  .win-title { font-family:'Oswald',sans-serif; font-size:44px; letter-spacing:5px; color:var(--green); margin-bottom:4px; font-weight:700; }
+  .win-sub   { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:3px; margin-bottom:20px; }
+  .win-box   { background:var(--surface); border:2px solid var(--navy); padding:16px; margin-bottom:20px; max-width:340px; width:100%; text-align:left; box-shadow:0 2px 12px rgba(15,42,90,0.1); }
+  .win-box-lbl { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--navy); letter-spacing:3px; margin-bottom:10px; font-weight:700; }
+  .win-stat  { display:flex; gap:8px; font-family:'Share Tech Mono',monospace; font-size:12px; margin-bottom:6px; color:var(--text); }
+  .win-stat span:first-child { color:var(--sky); min-width:90px; }
+
+  /* ── PROCESSING OVERLAYS ── */
+  .processing-overlay { position:fixed; inset:0; background:rgba(15,42,90,0.97); z-index:600; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px 20px; text-align:center; }
+  .processing-spinner { font-size:48px; margin-bottom:16px; animation:spin-emoji 1.5s linear infinite; }
+  @keyframes spin-emoji { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  .processing-title { font-family:'Oswald',sans-serif; font-size:28px; letter-spacing:3px; color:var(--gold); margin-bottom:10px; font-weight:700; }
+  .processing-sub   { font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(255,255,255,0.65); line-height:1.7; max-width:280px; margin-bottom:20px; }
+  .processing-gift-aid { background:rgba(245,200,66,0.12); border:1px solid var(--gold); padding:12px 14px; max-width:300px; font-family:'Share Tech Mono',monospace; font-size:10px; color:rgba(255,255,255,0.8); line-height:1.65; margin-bottom:16px; }
+  .processing-cancel { background:transparent; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.45); font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; padding:10px 24px; cursor:pointer; }
+
+  /* ── PHOTO GALLERY STRIP ── */
+  .gallery-thumb {
+    flex:1; min-width:0; cursor:pointer; overflow:hidden; position:relative;
+    border:2px solid transparent; transition:border-color 0.15s;
+  }
+  .gallery-thumb.active { border-color:var(--sky); }
+  .gallery-thumb img {
+    width:100%; height:62px; object-fit:cover; object-position:center;
+    display:block; filter:brightness(0.75) saturate(0.85);
+    transition:filter 0.15s;
+  }
+  .gallery-thumb.active img { filter:brightness(1) saturate(1); }
+  .gallery-thumb:active img { filter:brightness(0.9); }
+
+  /* ── GLOBAL ── */
+  @keyframes fadeIn  { from{opacity:0;}        to{opacity:1;} }
+  @keyframes slideUp { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+  .flash-red   { position:fixed; inset:0; background:rgba(200,32,58,0.18); z-index:2000; pointer-events:none; animation:flash-out 0.4s ease forwards; }
+  .flash-green { position:fixed; inset:0; background:rgba(26,128,64,0.12); z-index:2000; pointer-events:none; animation:flash-out 0.4s ease forwards; }
+  @keyframes flash-out { 0%{opacity:1;} 100%{opacity:0;} }
+  @keyframes pop-in { 0%{transform:scale(0.3);opacity:0;} 70%{transform:scale(1.15);} 100%{transform:scale(1);opacity:1;} }
+  @keyframes spin-geo { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ BOOT ═══════════ -->
+<div id="boot" class="screen active">
+  <div style="width:100%;background:linear-gradient(160deg,#0d2447 0%,#163370 55%,#0d2447 100%);padding:32px 20px 22px;position:relative;overflow:hidden;flex-shrink:0;">
+    <div style="position:absolute;inset:0;opacity:0.05;background-image:repeating-linear-gradient(45deg,#4eb8e8 0,#4eb8e8 1px,transparent 0,transparent 50%);background-size:18px 18px;"></div>
+    <div style="position:relative;text-align:center;">
+      <!-- Dynamo badge SVG -->
+      <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style="width:90px;height:90px;display:block;margin:0 auto 14px;">
+        <circle cx="60" cy="60" r="58" fill="#163370" stroke="#4eb8e8" stroke-width="3"/>
+        <circle cx="60" cy="60" r="50" fill="none" stroke="#4eb8e8" stroke-width="8"/>
+        <circle cx="60" cy="60" r="42" fill="white"/>
+        <circle cx="60" cy="60" r="42" fill="#4eb8e8" opacity="0.18"/>
+        <line x1="60" y1="20" x2="60" y2="100" stroke="#4eb8e8" stroke-width="1.5" opacity="0.45"/>
+        <line x1="22" y1="60" x2="98" y2="60" stroke="#4eb8e8" stroke-width="1.5" opacity="0.45"/>
+        <circle cx="60" cy="60" r="12" fill="#163370"/>
+        <circle cx="60" cy="60" r="8" fill="#4eb8e8"/>
+        <path id="ba1" d="M 18,60 a42,42 0 0,1 84,0" fill="none"/>
+        <text font-family="'Oswald',sans-serif" font-size="8.5" font-weight="700" fill="#0d2447" letter-spacing="2">
+          <textPath href="#ba1" startOffset="6%">CORSTORPHINE</textPath>
+        </text>
+        <path id="ba2" d="M 18,60 a42,42 0 0,0 84,0" fill="none"/>
+        <text font-family="'Oswald',sans-serif" font-size="8.5" font-weight="700" fill="#0d2447" letter-spacing="2">
+          <textPath href="#ba2" startOffset="22%">DYNAMO FC</textPath>
+        </text>
+      </svg>
+      <div style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:8px;color:rgba(78,184,232,0.8);text-transform:uppercase;margin-bottom:4px;">CORSTORPHINE</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:46px;letter-spacing:4px;color:#f5c842;line-height:1;font-weight:700;text-shadow:0 0 24px rgba(245,200,66,0.4);">ESCAPE<br>DOOM</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:4px;color:rgba(78,184,232,0.55);margin-top:8px;">// LIVE FIELD MISSION · EDINBURGH</div>
+    </div>
+  </div>
+  <div class="boot-body">
+    <div class="dynamo-strip">
+      <div class="dynamo-logo">⚽</div>
+      <div class="dynamo-strip-text">
+        Supporting <strong>Corstorphine Dynamo FC</strong> — building sport, wellbeing &amp; community for everyone.
+      </div>
+    </div>
+    <div class="alert-box">
+      <div class="alert-label">⚠ MISSION BRIEFING</div>
+      <div class="alert-text">
+        Begin at the <strong>Corstorphine Dovecot</strong>. Follow seven field clues across Corstorphine and up the hill. Solve the final clue and the <strong>10-minute bomb countdown begins</strong>. Reach the <strong>Barnton Bunker gates</strong> and defuse before detonation.
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-val">7</div><div class="stat-lbl">CLUES</div></div>
+      <div class="stat"><div class="stat-val">10:00</div><div class="stat-lbl">TO DEFUSE</div></div>
+      <div class="stat"><div class="stat-val">FREE</div><div class="stat-lbl">TO START</div></div>
+    </div>
+    <button class="btn-primary" onclick="showScreen('register')">BEGIN MISSION</button>
+    <button class="btn-secondary" onclick="showScreen('login')">RETURNING OPERATIVE? SIGN IN</button>
+  </div>
+</div>
+
+<!-- ═══════════ REGISTER ═══════════ -->
+<div id="register" class="screen">
+  <div class="screen-header">
+    <div class="screen-label">// OPERATIVE REGISTRATION</div>
+    <div class="screen-title">ENLIST</div>
+  </div>
+  <div class="scroll-body">
+    <div class="form-body">
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:20px;line-height:1.65;">Register your operative. Start the mission free — choose your contribution after the third clue.</p>
+      <div class="field">
+        <label>OPERATIVE CODENAME</label>
+        <input type="text" id="reg-name" placeholder="e.g. FOXHOUND" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="characters">
+        <div class="field-hint">Displayed on the debrief leaderboard</div>
+        <div class="error-msg" id="err-name"></div>
+      </div>
+      <div class="field">
+        <label>EMAIL ADDRESS</label>
+        <input type="email" id="reg-email" placeholder="agent@secure.net" autocomplete="off">
+        <div class="field-hint">Mission updates from Dynamo FC only</div>
+        <div class="error-msg" id="err-email"></div>
+      </div>
+      <div class="field">
+        <label>ACCESS PIN (4 digits)</label>
+        <input type="password" id="reg-pin" placeholder="••••" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        <div class="field-hint">Memorise this — no recovery option</div>
+        <div class="error-msg" id="err-pin"></div>
+      </div>
+      <div class="terms">
+        First three clues are <span>free</span>. After clue 3 you'll be invited to support <span>Corstorphine Dynamo FC</span> — a community charity. This event takes place in public spaces. Please be respectful of others.
+      </div>
+      <button class="btn-primary" style="max-width:100%;" onclick="handleRegister()">REGISTER OPERATIVE</button>
+      <button class="btn-secondary" style="max-width:100%;margin-top:10px;" onclick="showScreen('boot')">← BACK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ LOGIN ═══════════ -->
+<div id="login" class="screen">
+  <div class="screen-header">
+    <div class="screen-label">// OPERATIVE ACCESS</div>
+    <div class="screen-title">SIGN IN</div>
+  </div>
+  <div class="scroll-body">
+    <div class="form-body">
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:20px;line-height:1.65;">Welcome back. Resume your mission where you left off.</p>
+      <div class="field">
+        <label>OPERATIVE CODENAME</label>
+        <input type="text" id="login-name" placeholder="Your codename" autocomplete="off" autocorrect="off" autocapitalize="characters">
+        <div class="error-msg" id="err-login"></div>
+      </div>
+      <div class="field">
+        <label>ACCESS PIN</label>
+        <input type="password" id="login-pin" placeholder="••••" maxlength="4" inputmode="numeric" autocomplete="off">
+      </div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:20px;font-family:'Share Tech Mono',monospace;line-height:1.6;padding:10px;background:var(--surface);border:1px solid var(--border);">
+        Admin test access:<br>Codename <span style="color:var(--dynamo-gold)">ADMIN</span> · PIN <span style="color:var(--dynamo-gold)">0000</span>
+      </p>
+      <button class="btn-primary" style="max-width:100%;" onclick="handleLogin()">ACCESS MISSION</button>
+      <button class="btn-secondary" style="max-width:100%;margin-top:10px;" onclick="showScreen('boot')">← BACK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CLUE SCREEN ═══════════ -->
+<div id="clues" class="screen">
+  <div class="clue-header">
+    <div>
+      <div class="agent-tag" id="agent-tag">OPERATIVE: <span>—</span></div>
+      <div style="font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:2px;color:var(--red);">FIELD INTELLIGENCE</div>
+    </div>
+    <div style="text-align:right;">
+      <div id="clue-counter" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);">CLUE <span style="color:var(--red)">1</span>/7</div>
+      <div id="paid-status" style="display:none;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dynamo-gold);">SUPPORTER ✓</div>
+    </div>
+  </div>
+  <div class="clue-prog-wrap"><div class="clue-prog-fill" id="clue-prog" style="width:14%"></div></div>
+  <div class="scroll-body" style="padding-bottom:28px;">
+    <!-- Photo gallery strip — populated by loadClue() -->
+    <div id="clue-gallery" style="position:relative;width:100%;background:#0f2a5a;flex-shrink:0;overflow:hidden;">
+      <!-- Primary large image -->
+      <div style="position:relative;width:100%;overflow:hidden;">
+        <img id="clue-img-primary" src="" alt="" onerror="this.style.display='none'"
+          style="width:100%;height:220px;object-fit:cover;object-position:center;display:block;filter:brightness(0.85) contrast(1.05);">
+        <div class="hero-overlay"></div>
+        <div class="hero-diff" id="diff-label">EASY</div>
+        <div class="hero-caption">
+          <div class="hero-title" id="clue-title">—</div>
+          <span class="hero-sub" id="clue-location">—</span>
+        </div>
+      </div>
+      <!-- Thumbnail strip for additional photos -->
+      <div id="clue-thumbs" style="display:flex;gap:2px;background:#0f2a5a;padding:2px;"></div>
+    </div>
+    <div class="clue-body-text" id="clue-body">—</div>
+    <div class="key-collected" id="key-box" style="display:none;">🔑 CODE FRAGMENT COLLECTED: <strong id="key-val">—</strong></div>
+    <div class="hint-panel" id="hint-panel">
+      <div class="hint-label">// INTEL ASSIST</div>
+      <div class="hint-body" id="hint-body">—</div>
+    </div>
+    <div class="answer-wrap">
+      <div class="answer-lbl">ENTER ANSWER</div>
+      <input type="text" class="answer-input" id="clue-answer" placeholder="TYPE YOUR ANSWER…" autocomplete="off" autocorrect="off" autocapitalize="characters">
+      <div class="answer-feedback" id="clue-feedback"></div>
+      <div class="btn-row">
+        <button class="btn-submit" onclick="submitClueAnswer()">CONFIRM</button>
+        <button class="btn-hint"   onclick="revealHint()">HINT</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DONATION / PAYWALL ═══════════
+     JustGiving SDI with Gift Aid · Triggered after clue 3
+═══════════════════════════════════════════════ -->
+<div id="paywall" class="screen">
+  <div class="hero-wrap">
+    <img class="hero-img med"
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Corstorphine_Dovecot_-_geograph.org.uk_-_1063558.jpg/800px-Corstorphine_Dovecot_-_geograph.org.uk_-_1063558.jpg"
+      onerror="this.style.display='none'" alt="Corstorphine">
+    <div class="hero-overlay"></div>
+  </div>
+
+  <!-- Cause identity banner -->
+  <div class="cause-banner">
+    <div class="cause-banner-title">⚽ CORSTORPHINE DYNAMO FC</div>
+    <div class="cause-banner-sub">A community charity delivering sport &amp; wellbeing for <strong>all ages, all abilities</strong></div>
+  </div>
+  <div class="cause-stats">
+    <div class="cause-stat"><div class="cause-stat-val">600+</div><div class="cause-stat-lbl">MEMBERS</div></div>
+    <div class="cause-stat"><div class="cause-stat-val">300%</div><div class="cause-stat-lbl">GIRLS GROWTH</div></div>
+    <div class="cause-stat"><div class="cause-stat-val">10+</div><div class="cause-stat-lbl">YEARS SERVING</div></div>
+  </div>
+
+  <div class="paywall-body">
+
+    <!-- Momentum / loss aversion -->
+    <div class="momentum-msg">
+      <div class="momentum-msg-title">🔥 YOU'VE CRACKED 3 CLUES</div>
+      <div class="momentum-msg-text">Four more clues lead to the bomb — and your donation <strong style="color:var(--dynamo-gold)">buys you more time to defuse it</strong>. No donation gives you just 5 minutes. Every tier adds more time on the clock.</div>
+    </div>
+
+    <!-- Timer incentive table -->
+    <div style="width:100%;max-width:340px;margin-bottom:18px;border:1px solid var(--border-hot);overflow:hidden;">
+      <div style="background:rgba(212,32,53,0.12);padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--red);letter-spacing:3px;text-align:center;">⏱ YOUR DONATION = YOUR TIME</div>
+      <div style="display:flex;border-bottom:1px solid var(--border-hot);">
+        <div style="flex:1;padding:8px 10px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);">No donation</div>
+        <div style="padding:8px 10px;font-family:'Oswald',sans-serif;font-size:16px;color:var(--red);letter-spacing:1px;">5 MINUTES</div>
+      </div>
+      <div style="display:flex;border-bottom:1px solid var(--border-hot);">
+        <div style="flex:1;padding:8px 10px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);">⚡ Agent — £3</div>
+        <div style="padding:8px 10px;font-family:'Oswald',sans-serif;font-size:16px;color:var(--amber);letter-spacing:1px;">7 MINUTES</div>
+      </div>
+      <div style="display:flex;border-bottom:1px solid var(--border-hot);background:rgba(200,146,10,0.08);">
+        <div style="flex:1;padding:8px 10px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text);">🏆 Supporter — £5 ★</div>
+        <div style="padding:8px 10px;font-family:'Oswald',sans-serif;font-size:16px;color:var(--dynamo-gold);letter-spacing:1px;">10 MINUTES</div>
+      </div>
+      <div style="display:flex;">
+        <div style="flex:1;padding:8px 10px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);">🌟 Champion — £10</div>
+        <div style="padding:8px 10px;font-family:'Oswald',sans-serif;font-size:16px;color:var(--green);letter-spacing:1px;">15 MINUTES</div>
+      </div>
+    </div>
+
+    <!-- Gift Aid callout -->
+    <div class="gift-aid-box">
+      <div class="gift-aid-header">
+        <span class="gift-aid-icon">🏛</span>
+        <div>
+          <div class="gift-aid-title">GIFT AID — FREE MONEY FOR DYNAMO</div>
+          <div class="gift-aid-sub">UK taxpayers can boost their donation automatically</div>
+        </div>
+      </div>
+      <div class="gift-aid-examples">
+        <div class="ga-row"><span class="ga-tier">You give £3</span><span class="ga-arrow">→</span><span class="ga-total">Dynamo receives <strong>£3.75</strong></span></div>
+        <div class="ga-row ga-popular"><span class="ga-tier">You give £5</span><span class="ga-arrow">→</span><span class="ga-total">Dynamo receives <strong>£6.25</strong> ⭐</span></div>
+        <div class="ga-row"><span class="ga-tier">You give £10</span><span class="ga-arrow">→</span><span class="ga-total">Dynamo receives <strong>£12.50</strong></span></div>
+      </div>
+      <div class="gift-aid-note">JustGiving collects your Gift Aid declaration during checkout. You must have paid UK income tax equal to the Gift Aid claimed.</div>
+    </div>
+
+    <!-- Tiered donation cards -->
+    <div class="tier-heading">// CHOOSE YOUR DONATION LEVEL</div>
+    <div class="tier-cards">
+
+      <div class="tier-card" onclick="selectTier('agent', 3, this)">
+        <div class="tier-row">
+          <div class="tier-name">⚡ AGENT</div>
+          <div class="tier-price">£3</div>
+        </div>
+        <div class="tier-desc">Complete the mission and contribute to pitch development and community programmes.</div>
+        <div class="tier-perks">
+          <span class="tier-perk">Full Mission Access</span>
+          <span class="tier-perk">Leaderboard Entry</span>
+          <span class="tier-perk gift-aid-perk">+£0.75 Gift Aid</span>
+        </div>
+      </div>
+
+      <div class="tier-card popular" onclick="selectTier('supporter', 5, this)">
+        <div class="popular-badge">MOST POPULAR</div>
+        <div class="tier-row">
+          <div class="tier-name">🏆 SUPPORTER</div>
+          <div class="tier-price">£5</div>
+        </div>
+        <div class="tier-desc">Help fund the Tall Oaks 3G pitch — the next step for 600+ Dynamo members.</div>
+        <div class="tier-perks">
+          <span class="tier-perk">Full Mission Access</span>
+          <span class="tier-perk">Leaderboard Entry</span>
+          <span class="tier-perk">Supporter Status</span>
+          <span class="tier-perk gift-aid-perk">+£1.25 Gift Aid</span>
+        </div>
+      </div>
+
+      <div class="tier-card" onclick="selectTier('champion', 10, this)">
+        <div class="tier-row">
+          <div class="tier-name">🌟 CHAMPION</div>
+          <div class="tier-price">£10</div>
+        </div>
+        <div class="tier-desc">Kit out a youth player for a season. Your name on the Hall of Fame leaderboard.</div>
+        <div class="tier-perks">
+          <span class="tier-perk">Full Mission Access</span>
+          <span class="tier-perk">Hall of Fame</span>
+          <span class="tier-perk">Champion Badge</span>
+          <span class="tier-perk gift-aid-perk">+£2.50 Gift Aid</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="loss-aversion">
+      <span>⚠ Your 3 completed clues will be lost</span><br>if you abandon the mission now.
+    </div>
+
+    <!-- JustGiving trust signals -->
+    <div class="jg-trust-row">
+      <img src="https://www.justgiving.com/content/images/graphics/icons/justgiving-logo-white.svg"
+           onerror="this.style.display='none'"
+           alt="JustGiving" style="height:20px;opacity:0.7;margin-bottom:6px;">
+      <div class="jg-trust-text">Donations processed securely by JustGiving · Gift Aid claimed automatically by Dynamo FC · All funds go directly to the charity</div>
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);text-align:center;max-width:300px;line-height:1.6;margin-bottom:20px;">
+      Registered Scottish Charity ·
+      <a href="https://www.dynamofoundation.org.uk" target="_blank" style="color:var(--dynamo-gold);text-decoration:none;">dynamofoundation.org.uk</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ BOMB ARMED ═══════════ -->
+<div id="bomb-armed" class="screen">
+  <!-- Dynamo-branded bomb hero — SVG with club logo -->
+  <div style="position:relative;width:100%;background:var(--dynamo-navy);flex-shrink:0;padding:24px 0 18px;text-align:center;border-bottom:3px solid var(--dynamo-sky);">
+    <!-- SVG: Dynamo logo fused with bomb -->
+    <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:340px;display:block;margin:0 auto;">
+      <!-- Dark background -->
+      <rect width="320" height="200" fill="#0d2447"/>
+
+      <!-- Glow rings -->
+      <circle cx="160" cy="105" r="88" fill="none" stroke="rgba(78,184,232,0.15)" stroke-width="2"/>
+      <circle cx="160" cy="105" r="74" fill="none" stroke="rgba(78,184,232,0.1)" stroke-width="1"/>
+
+      <!-- Main bomb body circle -->
+      <circle cx="160" cy="108" r="68" fill="#163370" stroke="#4eb8e8" stroke-width="2.5"/>
+
+      <!-- Inner logo ring background -->
+      <circle cx="160" cy="108" r="60" fill="#0d2447"/>
+
+      <!-- Sky blue logo ring -->
+      <circle cx="160" cy="108" r="58" fill="none" stroke="#4eb8e8" stroke-width="10"/>
+
+      <!-- White inner circle -->
+      <circle cx="160" cy="108" r="48" fill="white"/>
+
+      <!-- Football pitch lines inside white circle -->
+      <circle cx="160" cy="108" r="48" fill="#4eb8e8" opacity="0.15"/>
+      <line x1="160" y1="62" x2="160" y2="154" stroke="#4eb8e8" stroke-width="1.5" opacity="0.4"/>
+      <line x1="115" y1="108" x2="205" y2="108" stroke="#4eb8e8" stroke-width="1.5" opacity="0.4"/>
+      <circle cx="160" cy="108" r="14" fill="none" stroke="#4eb8e8" stroke-width="1.5" opacity="0.4"/>
+
+      <!-- Football icon centre -->
+      <circle cx="160" cy="108" r="12" fill="#0d2447"/>
+      <circle cx="160" cy="108" r="9" fill="none" stroke="#4eb8e8" stroke-width="2"/>
+      <line x1="156" y1="101" x2="160" y2="108" stroke="#4eb8e8" stroke-width="2"/>
+      <line x1="164" y1="101" x2="160" y2="108" stroke="#4eb8e8" stroke-width="2"/>
+      <line x1="160" y1="108" x2="160" y2="116" stroke="#4eb8e8" stroke-width="2"/>
+      <line x1="156" y1="116" x2="160" y2="108" stroke="#4eb8e8" stroke-width="2"/>
+      <line x1="164" y1="116" x2="160" y2="108" stroke="#4eb8e8" stroke-width="2"/>
+
+      <!-- Arc text: CORSTORPHINE top -->
+      <path id="topArc" d="M 108,108 a52,52 0 0,1 104,0" fill="none"/>
+      <text font-family="'Oswald',sans-serif" font-size="9.5" font-weight="700" fill="#0d2447" letter-spacing="2">
+        <textPath href="#topArc" startOffset="5%">CORSTORPHINE</textPath>
+      </text>
+
+      <!-- Arc text: DYNAMO FC bottom -->
+      <path id="botArc" d="M 108,108 a52,52 0 0,0 104,0" fill="none"/>
+      <text font-family="'Oswald',sans-serif" font-size="9.5" font-weight="700" fill="#0d2447" letter-spacing="2">
+        <textPath href="#botArc" startOffset="18%">DYNAMO FC</textPath>
+      </text>
+
+      <!-- Bomb fuse (top right) -->
+      <path d="M208 72 Q224 50 218 36 Q212 24 228 18" fill="none" stroke="#f5c842" stroke-width="4" stroke-linecap="round"/>
+      <!-- Fuse spark -->
+      <circle cx="228" cy="17" r="5" fill="#f5c842" opacity="0.9">
+        <animate attributeName="r" values="5;8;5" dur="0.6s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.9;0.4;0.9" dur="0.6s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="228" cy="17" r="3" fill="white">
+        <animate attributeName="opacity" values="1;0.2;1" dur="0.6s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- BOMB ARMED text below -->
+      <text x="160" y="185" text-anchor="middle" font-family="'Oswald',sans-serif" font-size="18" font-weight="700" fill="#f5c842" letter-spacing="4">BOMB ARMED</text>
+      <text x="160" y="197" text-anchor="middle" font-family="'Share Tech Mono',monospace" font-size="7" fill="rgba(78,184,232,0.7)" letter-spacing="2">// DETONATION SEQUENCE INITIATED</text>
+    </svg>
+  </div>
+  <div class="bomb-body">
+    <div class="armed-sub">// DETONATION SEQUENCE INITIATED</div>
+    <div class="countdown-display" id="arm-countdown">--:--</div>
+    <div class="countdown-label" id="arm-countdown-label">MINUTES REMAINING · CLOCK IS RUNNING</div>
+    <div id="tier-timer-info" style="margin-bottom:16px;padding:10px 14px;background:rgba(200,146,10,0.12);border:1px solid var(--dynamo-gold);max-width:340px;width:100%;text-align:center;">
+      <div style="font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:2px;color:var(--dynamo-gold);margin-bottom:4px;" id="tier-timer-label">⏱ YOUR DONATION BOUGHT YOU TIME</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);line-height:1.6;" id="tier-timer-sub"></div>
+    </div>
+    <div class="armed-instructions">
+      <div class="armed-instr-lbl">// YOUR ORDERS</div>
+      <div class="instr-step"><span class="instr-num">01</span><span>Make your way to the <strong style="color:var(--amber)">gates of the Barnton Bunker NOW</strong> — northern end of Corstorphine Hill.</span></div>
+      <div class="instr-step"><span class="instr-num">02</span><span>At the gates face <strong style="color:var(--amber)">7 security challenges</strong> drawn from every clue you solved.</span></div>
+      <div class="instr-step"><span class="instr-num">03</span><span>Wrong answers cost <strong style="color:var(--red)">30 seconds</strong> each.</span></div>
+    </div>
+    <button class="btn-primary" style="max-width:100%;" onclick="checkLocationThenStart()" id="gate-btn" class="btn-primary-armed" style="max-width:100%;">📍 VERIFY I AM AT THE GATES</button>
+    <button class="btn-secondary" style="max-width:100%;margin-top:10px;font-size:10px;" onclick="startGateQuiz()" id="gate-skip-btn" style="max-width:100%;margin-top:10px;font-size:10px;background:transparent;border:1px solid rgba(90,180,224,0.4);color:rgba(90,180,224,0.6);font-family:Share Tech Mono,monospace;letter-spacing:1px;padding:10px;cursor:pointer;width:100%;">Skip location check (admin/poor signal)</button>
+  </div>
+</div>
+
+<!-- ═══════════ GEOLOCATION OVERLAY ═══════════ -->
+<div id="geo-overlay" style="display:none;position:fixed;inset:0;background:rgba(30,30,36,0.97);z-index:600;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;text-align:center;">
+  <div id="geo-checking" style="display:none;flex-direction:column;align-items:center;">
+    <div style="font-size:52px;margin-bottom:16px;animation:spin-geo 1.5s linear infinite;">📡</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:30px;letter-spacing:3px;color:var(--amber);margin-bottom:8px;">LOCATING YOU</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);line-height:1.7;max-width:280px;">Connecting to GPS satellite network…<br>Keep your phone steady and outdoors.</div>
+  </div>
+  <div id="geo-success" style="display:none;flex-direction:column;align-items:center;">
+    <div style="font-size:52px;margin-bottom:16px;">✅</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:30px;letter-spacing:3px;color:var(--green);margin-bottom:8px;">LOCATION CONFIRMED</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);margin-bottom:6px;" id="geo-dist-display"></div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green);margin-bottom:20px;">YOU ARE AT THE BUNKER GATES ✓</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:2px;color:var(--text-dim);margin-bottom:8px;">INITIATING DEFUSAL SEQUENCE…</div>
+  </div>
+  <div id="geo-toofar" style="display:none;flex-direction:column;align-items:center;">
+    <div style="font-size:52px;margin-bottom:16px;">⚠️</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:28px;letter-spacing:3px;color:var(--red);margin-bottom:8px;">NOT AT THE GATES</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text-dim);margin-bottom:6px;" id="geo-dist-far"></div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);line-height:1.7;max-width:300px;margin-bottom:20px;">
+      The gates are at <strong style="color:var(--amber)">35 Clermiston Road North, EH4 7BN</strong>.<br>Make your way there before defusing.
+    </div>
+    <button onclick="closeGeoOverlay()" style="background:var(--red);border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:3px;padding:13px 0;cursor:pointer;width:100%;max-width:300px;margin-bottom:10px;">← KEEP RUNNING</button>
+    <button onclick="startGateQuiz();closeGeoOverlay();" style="background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:10px 0;cursor:pointer;width:100%;max-width:300px;">Override — start anyway</button>
+  </div>
+  <div id="geo-denied" style="display:none;flex-direction:column;align-items:center;">
+    <div style="font-size:52px;margin-bottom:16px;">🔒</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:28px;letter-spacing:3px;color:var(--amber);margin-bottom:8px;">LOCATION BLOCKED</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);line-height:1.7;max-width:300px;margin-bottom:20px;">
+      Location access was denied. Enable it in your browser settings, or confirm you are at the gates and start manually.
+    </div>
+    <button onclick="startGateQuiz();closeGeoOverlay();" style="background:var(--amber);border:none;color:var(--bg);font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:3px;padding:13px 0;cursor:pointer;width:100%;max-width:300px;margin-bottom:10px;">I AM AT THE GATES — START</button>
+    <button onclick="closeGeoOverlay()" style="background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:10px 0;cursor:pointer;width:100%;max-width:300px;">← GO BACK</button>
+  </div>
+</div>
+<style>
+@keyframes spin-geo { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+</style>
+
+<!-- ═══════════ GATE QUIZ ═══════════ -->
+<div id="gate-quiz" class="screen">
+  <div class="gate-header">
+    <div class="gate-timer-row">
+      <div class="gate-title-lbl">⚡ DEFUSAL SEQUENCE</div>
+      <div class="gate-countdown" id="gate-countdown">10:00</div>
+    </div>
+    <div class="gate-progress"><div class="gate-progress-fill" id="gate-prog" style="width:0%"></div></div>
+  </div>
+  <div class="scroll-body" style="padding-bottom:24px;">
+    <!-- Quiz photo gallery -->
+    <div id="quiz-gallery" style="width:100%;background:#0f2a5a;flex-shrink:0;">
+      <img class="quiz-hero-img" id="quiz-img" src="" alt="" onerror="this.style.display='none'">
+      <div id="quiz-thumbs" style="display:flex;gap:2px;background:#0f2a5a;padding:2px;"></div>
+    </div>
+    <div class="quiz-q-label">SECURITY CHALLENGE <span id="q-num">1</span> OF 7</div>
+    <div class="quiz-card">
+      <div class="quiz-q-text" id="q-text">—</div>
+      <div class="quiz-options" id="q-options"></div>
+    </div>
+    <div class="quiz-feedback" id="q-feedback"></div>
+  </div>
+</div>
+
+<!-- ═══════════ DETONATION ═══════════ -->
+<div id="detonation" class="screen">
+  <div class="hero-wrap">
+    <img class="hero-img med"
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Doomsday_Clock_2023.svg/800px-Doomsday_Clock_2023.svg.png"
+      onerror="this.style.display='none'" alt="Detonation"
+      style="filter:brightness(0.3) saturate(0.2) contrast(1.4);">
+    <div class="hero-overlay" style="background:rgba(180,0,20,0.5);"></div>
+    <div class="hero-caption" style="text-align:center;left:0;right:0;">
+      <div style="font-size:52px;margin-bottom:8px;">💥</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:44px;letter-spacing:4px;color:#fff;text-shadow:0 0 30px var(--red-glow);">DETONATED</div>
+    </div>
+  </div>
+  <div class="det-body" style="background:var(--bg);">
+    <div class="det-sub">// MISSION FAILED · DEVICE TRIGGERED</div>
+    <div class="det-score">
+      <div class="det-score-lbl">CODES ENTERED BEFORE DETONATION</div>
+      <div class="det-score-val" id="det-score-val">0 / 7</div>
+    </div>
+    <p style="font-size:13px;color:var(--text-dim);line-height:1.7;margin-bottom:24px;max-width:300px;font-weight:300;">The facility has been sealed. The device can be reset — your team may try again.</p>
+    <button class="btn-primary" style="max-width:100%;" onclick="retryGate()">⟳ RETRY DEFUSAL</button>
+    <button class="btn-secondary" style="max-width:100%;margin-top:10px;" onclick="restartGame()">← ABORT & START OVER</button>
+  </div>
+</div>
+
+<!-- ═══════════ DEFUSED ═══════════ -->
+<div id="defused" class="screen">
+  <div class="hero-wrap">
+    <img class="hero-img med"
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Corstorphine_Dovecot_-_geograph.org.uk_-_1063558.jpg/800px-Corstorphine_Dovecot_-_geograph.org.uk_-_1063558.jpg"
+      onerror="this.style.display='none'" alt="Barnton Bunker"
+      style="filter:brightness(0.6) saturate(0.8);">
+    <div class="hero-overlay" style="background:linear-gradient(to bottom,rgba(0,80,40,0.3),rgba(66,66,74,0.85));"></div>
+    <div class="hero-caption" style="text-align:center;left:0;right:0;">
+      <div class="win-ring" style="margin:0 auto 10px;">✓</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:42px;letter-spacing:5px;color:#fff;text-shadow:0 0 20px rgba(10,158,86,0.6);">DEFUSED</div>
+    </div>
+  </div>
+  <div class="win-body">
+    <div class="win-sub">// BOMB NEUTRALISED · MISSION COMPLETE</div>
+    <div class="win-box">
+      <div class="win-box-lbl">// MISSION DEBRIEF</div>
+      <div class="win-stat"><span>OPERATIVE:</span><span id="win-name">—</span></div>
+      <div class="win-stat"><span>TIER:</span><span id="win-tier" style="color:var(--dynamo-gold);">—</span></div>
+      <div class="win-stat"><span>TIME LEFT:</span><span id="win-time" style="color:var(--green);">—</span></div>
+      <div class="win-stat"><span>CODES:</span><span id="win-codes" style="color:var(--green);">7 / 7</span></div>
+      <div class="win-stat" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-hot);"><span>STATUS:</span><span style="color:var(--green);">THREAT NEUTRALISED ✓</span></div>
+    </div>
+    <!-- Post-win upsell — commitment + reciprocity -->
+    <div id="win-upsell" style="display:none;width:100%;max-width:340px;background:var(--dynamo-blue);border:1px solid var(--dynamo-gold);padding:16px;margin-bottom:18px;text-align:center;">
+      <div style="font-family:'Oswald',sans-serif;font-size:20px;letter-spacing:2px;color:var(--dynamo-gold);margin-bottom:6px;">ENJOYED THE MISSION?</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.6;margin-bottom:12px;font-weight:300;">Upgrade your support and help Dynamo build the Tall Oaks 3G pitch — the next step for 600+ members.</div>
+      <button onclick="upgradeSupport()" style="background:var(--dynamo-gold);border:none;color:var(--dynamo-blue);font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:3px;padding:12px 24px;cursor:pointer;width:100%;">BECOME A CHAMPION — £10</button>
+    </div>
+    <button class="btn-primary" style="max-width:100%;margin-bottom:10px;" onclick="shareVictory()">BROADCAST DEBRIEF</button>
+    <button class="btn-secondary" style="max-width:100%;" onclick="restartGame()">← NEW MISSION</button>
+  </div>
+</div>
+
+<!-- ═══════════ WIRE CUT ═══════════ -->
+<div id="wire-cut" class="screen">
+  <div class="gate-header">
+    <div class="gate-timer-row">
+      <div class="gate-title-lbl">⚡ FINAL STEP — CUT THE WIRE</div>
+      <div class="gate-countdown" id="wire-countdown">01:00</div>
+    </div>
+    <div class="gate-progress"><div class="gate-progress-fill" style="width:100%"></div></div>
+  </div>
+  <div class="scroll-body" style="padding-bottom:32px;">
+
+    <div style="padding:16px 18px 0;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--navy);letter-spacing:2px;margin-bottom:8px;font-weight:700;">⚠ FINAL DEACTIVATION REQUIRED</div>
+      <div style="font-size:14px;color:var(--text);line-height:1.75;font-weight:300;margin-bottom:16px;">
+        All codes entered. One step remains.<br><br>
+        Inside the bomb casing are three wires. Cut the correct one and the device disarms. Cut the wrong one and it detonates <strong style="color:var(--red)">instantly</strong>.<br><br>
+        <strong style="color:var(--amber)">❓ What colour is the Corstorphine Dynamo home kit?</strong><br>
+        <span style="font-size:12px;color:var(--text-dim);">Hint: it's the main colour used on their website.</span>
+      </div>
+    </div>
+
+    <!-- SVG Wire Illustration -->
+    <div style="background:var(--surface);border-top:2px solid var(--border-hot);border-bottom:2px solid var(--border-hot);padding:20px 0;margin-bottom:16px;">
+      <svg viewBox="0 0 340 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px;display:block;margin:0 auto;">
+        <!-- Bomb casing left connector -->
+        <rect x="10" y="60" width="50" height="40" rx="4" fill="#2a2a32" stroke="#606068" stroke-width="1.5"/>
+        <text x="35" y="85" text-anchor="middle" fill="#686872" font-size="8" font-family="monospace">DETONATOR</text>
+        <!-- Bomb casing right connector -->
+        <rect x="280" y="60" width="50" height="40" rx="4" fill="#2a2a32" stroke="#606068" stroke-width="1.5"/>
+        <text x="305" y="85" text-anchor="middle" fill="#686872" font-size="8" font-family="monospace">TRIGGER</text>
+
+        <!-- RED wire — top -->
+        <path d="M60 68 C120 68 140 48 200 48 C240 48 260 68 280 68" fill="none" stroke="#cc2030" stroke-width="7" stroke-linecap="round"/>
+        <path d="M60 68 C120 68 140 48 200 48 C240 48 260 68 280 68" fill="none" stroke="#ff4455" stroke-width="3" stroke-linecap="round" stroke-dasharray="0"/>
+        <text x="170" y="36" text-anchor="middle" fill="#ff6670" font-size="11" font-family="monospace" font-weight="bold">RED</text>
+
+        <!-- SKY BLUE wire — middle -->
+        <path d="M60 80 L280 80" fill="none" stroke="#0077bb" stroke-width="7" stroke-linecap="round"/>
+        <path d="M60 80 L280 80" fill="none" stroke="#55bbff" stroke-width="3" stroke-linecap="round"/>
+        <text x="170" y="77" text-anchor="middle" fill="#88ddff" font-size="11" font-family="monospace" font-weight="bold">SKY BLUE</text>
+
+        <!-- GREEN wire — bottom -->
+        <path d="M60 92 C120 92 140 112 200 112 C240 112 260 92 280 92" fill="none" stroke="#1a6a30" stroke-width="7" stroke-linecap="round"/>
+        <path d="M60 92 C120 92 140 112 200 112 C240 112 260 92 280 92" fill="none" stroke="#44cc66" stroke-width="3" stroke-linecap="round"/>
+        <text x="170" y="128" text-anchor="middle" fill="#66ee88" font-size="11" font-family="monospace" font-weight="bold">GREEN</text>
+
+        <!-- Scissors icons above each wire at cut point -->
+        <text x="170" y="56" text-anchor="middle" fill="#888" font-size="14">✂</text>
+        <text x="170" y="75" text-anchor="middle" fill="#888" font-size="14">✂</text>
+        <text x="170" y="107" text-anchor="middle" fill="#888" font-size="14">✂</text>
+      </svg>
+    </div>
+
+    <div style="padding:0 16px;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:2px;margin-bottom:10px;text-align:center;">SELECT THE WIRE TO CUT</div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="cutWire('red')"
+          style="background:rgba(204,32,48,0.15);border:2px solid #cc2030;color:#ff6670;font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:4px;padding:16px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:12px;">
+          <span style="display:inline-block;width:40px;height:8px;background:#ff4455;border-radius:4px;box-shadow:0 0 8px rgba(255,68,85,0.5);"></span>
+          CUT RED
+          <span style="display:inline-block;width:40px;height:8px;background:#ff4455;border-radius:4px;box-shadow:0 0 8px rgba(255,68,85,0.5);"></span>
+        </button>
+        <button onclick="cutWire('skyblue')"
+          style="background:rgba(0,119,187,0.15);border:2px solid #0077bb;color:#88ddff;font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:4px;padding:16px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:12px;">
+          <span style="display:inline-block;width:40px;height:8px;background:#55bbff;border-radius:4px;box-shadow:0 0 8px rgba(85,187,255,0.5);"></span>
+          CUT SKY BLUE
+          <span style="display:inline-block;width:40px;height:8px;background:#55bbff;border-radius:4px;box-shadow:0 0 8px rgba(85,187,255,0.5);"></span>
+        </button>
+        <button onclick="cutWire('green')"
+          style="background:rgba(26,106,48,0.15);border:2px solid #1a6a30;color:#66ee88;font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:4px;padding:16px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:12px;">
+          <span style="display:inline-block;width:40px;height:8px;background:#44cc66;border-radius:4px;box-shadow:0 0 8px rgba(68,204,102,0.5);"></span>
+          CUT GREEN
+          <span style="display:inline-block;width:40px;height:8px;background:#44cc66;border-radius:4px;box-shadow:0 0 8px rgba(68,204,102,0.5);"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// LOCATION IMAGES
+// ═══════════════════════════════════════════════
+// Each clue has an array of photos [primary, secondary?, tertiary?]
+// All images are from Wikimedia Commons / geograph.org.uk under CC BY-SA
+const CLUE_IMAGES = [
+  // 1 — Corstorphine Dovecot
+  [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Corstorphine_Castle_doocot%2C_Edinburgh.JPG/800px-Corstorphine_Castle_doocot%2C_Edinburgh.JPG",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Corstorphine_Dovecot_-_geograph.org.uk_-_1063558.jpg/800px-Corstorphine_Dovecot_-_geograph.org.uk_-_1063558.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Corstorphine_Doocot_-_geograph.org.uk_-_3332364.jpg/800px-Corstorphine_Doocot_-_geograph.org.uk_-_3332364.jpg"
+  ],
+  // 2 — Corstorphine Old Parish Church
+  [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Corstorphine_Old_Parish_Church_-_geograph.org.uk_-_1547023.jpg/800px-Corstorphine_Old_Parish_Church_-_geograph.org.uk_-_1547023.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Corstorphine_Church_-_geograph.org.uk_-_860455.jpg/800px-Corstorphine_Church_-_geograph.org.uk_-_860455.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Corstorphine_Old_Parish_Church_-_geograph.org.uk_-_2104943.jpg/800px-Corstorphine_Old_Parish_Church_-_geograph.org.uk_-_2104943.jpg"
+  ],
+  // 3 — Corstorphine Heritage Centre / St Margaret's Park
+  [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Corstorphine_Heritage_Centre_-_geograph.org.uk_-_413464.jpg/800px-Corstorphine_Heritage_Centre_-_geograph.org.uk_-_413464.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/St_Margaret%27s_Park%2C_Corstorphine_-_geograph.org.uk_-_1407536.jpg/800px-St_Margaret%27s_Park%2C_Corstorphine_-_geograph.org.uk_-_1407536.jpg"
+  ],
+  // 4 — The White Lady pub
+  [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/The_White_Lady%2C_Edinburgh_-_geograph.org.uk_-_3450793.jpg/800px-The_White_Lady%2C_Edinburgh_-_geograph.org.uk_-_3450793.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/St_John%27s_Road%2C_Corstorphine_-_geograph.org.uk_-_784388.jpg/800px-St_John%27s_Road%2C_Corstorphine_-_geograph.org.uk_-_784388.jpg"
+  ],
+  // 5 — Walled Garden, Corstorphine Hill
+  [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Corstorphine_Hill_Walled_Garden_-_geograph.org.uk_-_1399076.jpg/800px-Corstorphine_Hill_Walled_Garden_-_geograph.org.uk_-_1399076.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Corstorphine_Hill_-_geograph.org.uk_-_1399092.jpg/800px-Corstorphine_Hill_-_geograph.org.uk_-_1399092.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Corstorphine_Hill_-_geograph.org.uk_-_1238571.jpg/800px-Corstorphine_Hill_-_geograph.org.uk_-_1238571.jpg"
+  ],
+  // 6 — Clermiston Tower (Scott Tower)
+  [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Clermiston_Tower_-_geograph.org.uk_-_1238629.jpg/800px-Clermiston_Tower_-_geograph.org.uk_-_1238629.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Clermiston_Tower_Edinburgh.jpg/800px-Clermiston_Tower_Edinburgh.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/View_from_Clermiston_Tower_-_geograph.org.uk_-_1238637.jpg/800px-View_from_Clermiston_Tower_-_geograph.org.uk_-_1238637.jpg"
+  ],
+  // 7 — Cipher / Corstorphine Hill panorama
+  [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Corstorphine_Hill_-_geograph.org.uk_-_1238571.jpg/1280px-Corstorphine_Hill_-_geograph.org.uk_-_1238571.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Clermiston_Tower_-_geograph.org.uk_-_1238629.jpg/800px-Clermiston_Tower_-_geograph.org.uk_-_1238629.jpg"
+  ]
+];
+
+// ═══════════════════════════════════════════════
+// FIELD CLUES
+// ═══════════════════════════════════════════════
+const FIELD_CLUES = [
+  { id:1, title:"THE DOVECOT CIPHER",      location:"DOVECOT ROAD, CORSTORPHINE",         difficulty:"EASY",   diffClass:"diff-easy",
+    body:`You are standing at the Corstorphine Dovecot on Dovecot Road — the last surviving structure of the long-demolished Corstorphine Castle.\n\nThis beehive-shaped tower was built in the 1500s to house hundreds of pigeons for the castle estate. Read the Historic Environment Scotland information board beside the Dovecot carefully.\n\nThe interior walls are lined with rows of stone nesting boxes arranged in tiers from floor to ceiling.\n\n❓ How many tiers of nesting boxes are there inside the Dovecot?\n\nThis number is your first code fragment.`,
+    hint:"The answer is on the information board beside the Dovecot. It is a two-digit number. Each horizontal row of nesting boxes counts as one tier.",
+    answer:"28", altAnswers:["TWENTY EIGHT","TWENTY-EIGHT"], keyLabel:"FRAGMENT ALPHA", keyValue:"28" },
+
+  { id:2, title:"THE CHURCH OF THE FORRESTERS", location:"KIRK LOAN, CORSTORPHINE",       difficulty:"EASY",   diffClass:"diff-easy",
+    body:`Walk from the Dovecot to Corstorphine Old Parish Church on Kirk Loan — one of Edinburgh's oldest churches, founded by the Forrester family who built the castle.\n\nStep inside (open Wednesday mornings) or read the information board outside. Find the foundation stone inscription on the inner east wall recording the year the current church was built.\n\nThat year is your second code fragment.`,
+    hint:"The Forrester family elevated this to a collegiate church. The year is a four-digit number in the 1400s — look on the inner east wall or the church information board.",
+    answer:"1429", altAnswers:["FOURTEEN TWENTY NINE"], keyLabel:"FRAGMENT BETA", keyValue:"1429" },
+
+  { id:3, title:"THE GHOST TREE",           location:"ST MARGARET'S PARK, CORSTORPHINE",  difficulty:"MEDIUM", diffClass:"diff-medium",
+    body:`Head to St Margaret's Park and visit the Corstorphine Heritage Centre — the 17th-century Dower House serving as the village's local history museum.\n\nInside is an exhibit on the legendary Corstorphine Sycamore Tree — a haunted landmark felled by a violent storm. The exhibit includes a section of the actual tree and records the year it came down.\n\nThat year is your third code fragment.`,
+    hint:"The Sycamore Tree witnessed an infamous murder in 1679. It was destroyed in a winter storm — the exhibit records the exact year. Think Boxing Day.",
+    answer:"1996", altAnswers:["NINETEEN NINETY SIX"], keyLabel:"FRAGMENT GAMMA", keyValue:"1996" },
+
+  { id:4, title:"THE WHITE LADY",           location:"ST JOHN'S ROAD, CORSTORPHINE",       difficulty:"MEDIUM", diffClass:"diff-medium",
+    body:`Make your way to The White Lady pub on St John's Road — named after the ghost of Christian Nimmo, who murdered Lord Forrester with his own sword beneath the Sycamore Tree in 1679.\n\nFind the engraved stone panel inside the pub recording Corstorphine's history. It records how tall the famous sycamore tree stood in its heyday.\n\n❓ How many feet tall was the Corstorphine Sycamore Tree at its greatest height?\n\nThat number is your fourth code fragment.`,
+    hint:"Look for the engraved stone heritage panel inside the pub. The height is in feet and is a two-digit number greater than 50.",
+    answer:"55", altAnswers:["FIFTY FIVE","FIFTY-FIVE"], keyLabel:"FRAGMENT DELTA", keyValue:"55" },
+
+  { id:5, title:"THE WALLED GARDEN",        location:"CORSTORPHINE HILL, WESTERN SLOPES",  difficulty:"MEDIUM", diffClass:"diff-medium",
+    body:`Head up onto Corstorphine Hill and find the Walled Garden on the western slopes — a hidden oasis restored by volunteers from the Friends of Corstorphine Hill.\n\nThe garden was originally the kitchen garden of Hillwood House, a grand Victorian estate mansion. Find the information board at the entrance recording the decade Hillwood House was built.\n\n❓ Enter the year that decade began (e.g. 1870 for the 1870s). That is your fifth code fragment.`,
+    hint:"Hillwood House was built in the Victorian era. The information board gives the answer. The house dates from the 1870s — enter the year that decade began.",
+    answer:"1870", altAnswers:["1870S","EIGHTEEN SEVENTY"], keyLabel:"FRAGMENT EPSILON", keyValue:"1870" },
+
+  { id:6, title:"THE SCOTT TOWER",          location:"SUMMIT OF CORSTORPHINE HILL",         difficulty:"HARD",   diffClass:"diff-hard",
+    body:`Follow the path to the summit of Corstorphine Hill and find the Clermiston Tower — the castellated stone memorial to Sir Walter Scott, built in 1871.\n\nStand at the base of the tower and count its storeys from ground level up to the battlemented parapet at the top.\n\n❓ How many storeys does the Clermiston Tower have?\n\nThat number is your sixth code fragment.`,
+    hint:"The tower is a square stone structure with buttressed corners and a castellated top. Count each distinct level from ground to parapet.",
+    answer:"5", altAnswers:["FIVE"], keyLabel:"FRAGMENT ZETA", keyValue:"5" },
+
+  { id:7, title:"THE DETONATION CIPHER",    location:"CALCULATE BEFORE YOU RUN",            difficulty:"HARD",   diffClass:"diff-hard",
+    body:`You have now collected all six code fragments:\n\n  🔑 ALPHA   — Tiers in the Dovecot       (28)\n  🔑 BETA    — Year Parish Church founded  (1429)\n  🔑 GAMMA   — Year Sycamore Tree fell     (1996)\n  🔑 DELTA   — Height of Sycamore (ft)    (55)\n  🔑 EPSILON — Decade Hillwood built      (1870)\n  🔑 ZETA    — Storeys in Scott Tower     (5)\n\nAdd together ALL individual digits of every fragment:\n\n  Example: 12 and 345 → (1+2)+(3+4+5) = 15\n\n⚠ WARNING: Entering this cipher ARMS THE BOMB. You have exactly 10 minutes to reach the Barnton Bunker gates. Do not enter unless you are ready to run.\n\nCalculate and enter your detonation cipher now.`,
+    hint:"Fragment by fragment: ALPHA(28)=2+8=10. BETA(1429)=1+4+2+9=16. GAMMA(1996)=1+9+9+6=25. DELTA(55)=5+5=10. EPSILON(1870)=1+8+7+0=16. ZETA(5)=5. Total: 10+16+25+10+16+5 = 82.",
+    answer:"82", altAnswers:["EIGHTY TWO","EIGHTY-TWO"], keyLabel:"DETONATION CIPHER — BOMB ARMED", keyValue:"82" }
+];
+
+// ═══════════════════════════════════════════════
+// GATE QUIZ
+// ═══════════════════════════════════════════════
+const GATE_QUESTIONS = [
+  { q:"DEACTIVATION CODE ALPHA — How many tiers of stone nesting boxes are inside the Corstorphine Dovecot?", options:["18","22","28","34"], correct:2 },
+  { q:"DEACTIVATION CODE BETA — In what year was Corstorphine Old Parish Church founded as a collegiate church?", options:["1388","1411","1429","1458"], correct:2 },
+  { q:"DEACTIVATION CODE GAMMA — In what year did the Corstorphine Sycamore Tree blow down in a storm?", options:["1979","1987","1996","2003"], correct:2 },
+  { q:"DEACTIVATION CODE DELTA — How tall was the Corstorphine Sycamore Tree at its greatest height?", options:["42 feet","48 feet","55 feet","63 feet"], correct:2 },
+  { q:"DEACTIVATION CODE EPSILON — In which decade was Hillwood House (home of the Walled Garden) built?", options:["1840s","1850s","1860s","1870s"], correct:3 },
+  { q:"DEACTIVATION CODE ZETA — How many storeys does the Clermiston Tower on Corstorphine Hill have?", options:["3","4","5","6"], correct:2 },
+  { q:"FINAL OVERRIDE — What is the detonation cipher? (Sum of ALL digits from: 28 + 1429 + 1996 + 55 + 1870 + 5)", options:["74","78","82","87"], correct:2 }
+];
+
+const WRONG_PENALTY_SECONDS = 30;
+
+// Timer duration is set dynamically in armBomb() based on donation tier
+// No donation → 5 min | Agent £3 → 7 min | Supporter £5 → 10 min | Champion £10 → 15 min
+const TIER_DURATIONS = { '':300, 'agent':420, 'supporter':600, 'champion':900 };
+
+function getBombDuration() {
+  return TIER_DURATIONS[state.donationTier || ''] || 300;
+}
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let state = {
+  operativeName:'', email:'', pin:'',
+  currentClue:0, hasPaid:false, donationTier:'',
+  bombArmed:false, bombStartTime:null,
+  currentQuestion:0, correctAnswers:0,
+  timeRemainingAtWin:null, pendingPayment:false,
+  selectedTierAmount:5
+};
+function saveState() { try { localStorage.setItem('ced_state', JSON.stringify(state)); } catch(e){} }
+function loadState()  { try { const s=localStorage.getItem('ced_state'); if(s) state={...state,...JSON.parse(s)}; } catch(e){} }
+
+// ═══════════════════════════════════════════════
+// SCREEN
+// ═══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════════
+// REGISTER
+// ═══════════════════════════════════════════════
+function handleRegister() {
+  const name=document.getElementById('reg-name').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const pin=document.getElementById('reg-pin').value.trim();
+  let valid=true;
+  ['err-name','err-email','err-pin'].forEach(id=>document.getElementById(id).textContent='');
+  if (!name||name.length<2)                      { document.getElementById('err-name').textContent='⚠ Codename required (min 2 chars)'; valid=false; }
+  if (!email||!email.includes('@'))              { document.getElementById('err-email').textContent='⚠ Valid email required'; valid=false; }
+  if (!pin||pin.length!==4||!/^\d{4}$/.test(pin)){ document.getElementById('err-pin').textContent='⚠ 4-digit PIN required'; valid=false; }
+  if (!valid) return;
+  state.operativeName=name.toUpperCase(); state.email=email; state.pin=pin;
+  state.currentClue=0; state.hasPaid=false; state.donationTier='';
+  state.bombArmed=false; state.bombStartTime=null; state.currentQuestion=0; state.correctAnswers=0;
+  saveState(); startMission();
+}
+
+// ═══════════════════════════════════════════════
+// LOGIN  — admin bypass: ADMIN / 0000
+// ═══════════════════════════════════════════════
+function handleLogin() {
+  const name=document.getElementById('login-name').value.trim().toUpperCase();
+  const pin=document.getElementById('login-pin').value.trim();
+  document.getElementById('err-login').textContent='';
+  if (name==='ADMIN' && pin==='0000') {
+    state.operativeName='ADMIN'; state.pin='0000'; state.email='admin@test.local';
+    state.currentClue=0; state.hasPaid=true; state.donationTier='champion';
+    state.bombArmed=false; state.bombStartTime=null; state.currentQuestion=0; state.correctAnswers=0;
+    saveState(); startMission(); return;
+  }
+  try {
+    const saved=JSON.parse(localStorage.getItem('ced_state')||'{}');
+    if (saved.operativeName===name && saved.pin===pin) { state={...state,...saved}; startMission(); }
+    else document.getElementById('err-login').textContent='⚠ Codename or PIN not recognised';
+  } catch(e) { document.getElementById('err-login').textContent='⚠ No profile found — please register.'; }
+}
+
+// ═══════════════════════════════════════════════
+// MISSION
+// ═══════════════════════════════════════════════
+function startMission() {
+  if (state.bombArmed && state.bombStartTime) {
+    const elapsed=Math.floor((Date.now()-state.bombStartTime)/1000);
+    if (elapsed<getBombDuration()) { showScreen('gate-quiz'); resumeGateQuiz(); return; }
+    document.getElementById('det-score-val').textContent=`${state.correctAnswers} / ${GATE_QUESTIONS.length}`;
+    showScreen('detonation'); return;
+  }
+  showScreen('clues'); loadClue(state.currentClue);
+}
+
+// ═══════════════════════════════════════════════
+// LOAD CLUE
+// ═══════════════════════════════════════════════
+function buildGallery(images, primaryId, thumbsId, switchFn) {
+  const primary = document.getElementById(primaryId);
+  const thumbs  = document.getElementById(thumbsId);
+  if (!images || !images.length) { primary.src=''; primary.style.display='none'; thumbs.innerHTML=''; return; }
+  const imgs = Array.isArray(images[0]) ? images : [images]; // handle both formats
+  const arr = Array.isArray(images) && typeof images[0]==='string' ? images : images;
+
+  // Set primary image
+  primary.src = arr[0];
+  primary.style.display = '';
+  primary.onerror = function(){ this.style.display='none'; };
+
+  // Build thumbnail strip (only if 2+ images)
+  thumbs.innerHTML = '';
+  if (arr.length < 2) return;
+  arr.forEach((url, i) => {
+    const div = document.createElement('div');
+    div.className = 'gallery-thumb' + (i===0?' active':'');
+    div.innerHTML = `<img src="${url}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'">`;
+    div.onclick = () => {
+      primary.src = url;
+      primary.style.display = '';
+      thumbs.querySelectorAll('.gallery-thumb').forEach(t=>t.classList.remove('active'));
+      div.classList.add('active');
+    };
+    thumbs.appendChild(div);
+  });
+}
+
+function loadClue(index) {
+  const clue=FIELD_CLUES[index];
+  state.currentClue=index; saveState();
+  document.getElementById('agent-tag').innerHTML=`OPERATIVE: <span>${state.operativeName}</span>`;
+  document.getElementById('clue-counter').innerHTML=`CLUE <span style="color:var(--red)">${index+1}</span>/${FIELD_CLUES.length}`;
+  document.getElementById('paid-status').style.display=state.hasPaid?'block':'none';
+  document.getElementById('clue-prog').style.width=`${((index+1)/FIELD_CLUES.length)*100}%`;
+  // Gallery
+  buildGallery(CLUE_IMAGES[index]||[], 'clue-img-primary', 'clue-thumbs');
+  // Hero text
+  document.getElementById('clue-title').textContent=clue.title;
+  document.getElementById('clue-location').textContent=clue.location;
+  const diff=document.getElementById('diff-label');
+  diff.textContent=clue.difficulty; diff.className='hero-diff '+clue.diffClass;
+  // Body
+  document.getElementById('clue-body').textContent=clue.body;
+  document.getElementById('hint-panel').style.display='none';
+  document.getElementById('hint-body').textContent=clue.hint;
+  document.getElementById('key-box').style.display='none';
+  document.getElementById('clue-answer').value='';
+  document.getElementById('clue-feedback').textContent='';
+  document.getElementById('clue-feedback').className='answer-feedback';
+}
+
+function revealHint() { document.getElementById('hint-panel').style.display='block'; }
+
+// ═══════════════════════════════════════════════
+// SUBMIT CLUE
+// ═══════════════════════════════════════════════
+function submitClueAnswer() {
+  const input=document.getElementById('clue-answer').value.trim().toUpperCase();
+  const feedback=document.getElementById('clue-feedback');
+  const clue=FIELD_CLUES[state.currentClue];
+  if (!input) { feedback.textContent='⚠ ENTER YOUR ANSWER FIRST'; feedback.className='answer-feedback fb-bad'; return; }
+  const correct=clue.answer.toUpperCase();
+  const alts=(clue.altAnswers||[]).map(a=>a.toUpperCase());
+  const isRight=input===correct||alts.includes(input)||input.replace(/\s/g,'')===correct.replace(/\s/g,'');
+  if (isRight) {
+    feedback.textContent=`✓ CODE FRAGMENT SECURED — ${clue.keyLabel}`;
+    feedback.className='answer-feedback fb-ok';
+    document.getElementById('key-box').style.display='block';
+    document.getElementById('key-val').textContent=clue.keyValue;
+    flashScreen('green');
+    setTimeout(()=>{
+      // ── BEHAVIOURAL ECONOMICS: paywall fires after clue 3 (index 2) ──
+      // By this point: sunk cost is real (3 clues solved), momentum is high,
+      // identity is established (they're an "operative"), reciprocity is triggered
+      // (3 free clues received). Peak engagement before fatigue sets in.
+      if (state.currentClue===2 && !state.hasPaid) { state.currentClue=3; saveState(); showPaywall(); return; }
+      if (state.currentClue===FIELD_CLUES.length-1) { armBomb(); return; }
+      loadClue(state.currentClue+1);
+    }, 1400);
+  } else {
+    feedback.textContent='✗ INCORRECT — VERIFY YOUR READING';
+    feedback.className='answer-feedback fb-bad'; flashScreen('red');
+    document.getElementById('clue-answer').style.borderBottomColor='var(--red)';
+    setTimeout(()=>{ document.getElementById('clue-answer').style.borderBottomColor='var(--red-dim)'; }, 700);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// JUSTGIVING SDI — CONFIGURED FOR CORSTORPHINE DYNAMO FC
+// ═══════════════════════════════════════════════
+//
+// ✅ CHARITY ID:  3103399  (pre-configured — no changes needed)
+// ✅ APP ID:      NOT REQUIRED for the SDI donation URL.
+//                The App ID is only needed if you later want to query
+//                donation data programmatically via JustGiving's API.
+//                For sending players to JustGiving's checkout, the
+//                charity ID alone is sufficient.
+//
+// ⚙ ONE THING LEFT TO SET:
+//    JG_RETURN_BASE_URL — the public web address where this game is hosted.
+//    Players return here after donating on JustGiving.
+//    Example: 'https://dynamofoundation.org.uk/escape-doom'
+//             'https://corstorphinedynamo.github.io/escape-doom'
+//             'https://escape-doom.netlify.app'
+//    Set this once the game is hosted, then the integration is complete.
+//
+// HOW THE SDI URL WORKS (no API key needed):
+//   https://link.justgiving.com/v1/charity/donate/charityId/3103399
+//     ?donationValue=5
+//     &currency=GBP
+//     &exiturl={encodedReturnURL}
+//     &reference={operativeRef}
+//     &message={missionMessage}
+//
+//   JustGiving handles: card payment, Apple Pay, Google Pay,
+//   Gift Aid declaration, receipts, and Gift Aid reclaim to HMRC.
+// ─────────────────────────────────────────────────────────────────────
+
+const JG_CHARITY_ID      = '3103399';           // ✅ Corstorphine Dynamo FC — confirmed
+const JG_RETURN_BASE_URL = 'https://mrstoneysoprano.github.io/corstorphine-escape-doom/donation-complete.html'; // ✅ GitHub Pages return page
+//                          e.g. 'https://dynamofoundation.org.uk/escape-doom'
+
+// Tier definitions with amounts and Gift Aid equivalents
+const TIERS = {
+  agent:     { amount:3,  giftAid:3.75,  label:'⚡ AGENT',    emoji:'⚡' },
+  supporter: { amount:5,  giftAid:6.25,  label:'🏆 SUPPORTER', emoji:'🏆' },
+  champion:  { amount:10, giftAid:12.50, label:'🌟 CHAMPION',  emoji:'🌟' }
+};
+
+function showPaywall() {
+  showScreen('paywall');
+}
+
+function selectTier(tier, amount, el) {
+  // Visual feedback — highlight selected card
+  document.querySelectorAll('.tier-card').forEach(c => {
+    c.style.outline='none';
+    if (!c.classList.contains('popular')) c.style.borderColor='var(--border)';
+  });
+  el.style.outline='3px solid var(--green)';
+  el.style.outlineOffset='2px';
+
+  state.donationTier=tier;
+  state.selectedTierAmount=amount;
+  saveState();
+
+  // Brief visual pause then show processing overlay
+  setTimeout(()=>{ initiateJGDonation(tier, amount); }, 350);
+}
+
+function initiateJGDonation(tier, amount) {
+  const tierInfo = TIERS[tier];
+
+  // Show informative processing overlay before redirecting to JustGiving
+  const overlay = document.createElement('div');
+  overlay.className = 'processing-overlay';
+  overlay.id = 'jg-overlay';
+  overlay.innerHTML = `
+    <div class="processing-spinner">⚽</div>
+    <div class="processing-title">HEADING TO JUSTGIVING</div>
+    <div class="processing-sub">
+      You're donating <strong style="color:var(--dynamo-gold)">£${amount}</strong>
+      to Corstorphine Dynamo FC.<br><br>
+      JustGiving will ask if you're a UK taxpayer — say <strong style="color:var(--dynamo-gold)">YES</strong> if you are.
+    </div>
+    <div class="processing-gift-aid">
+      🏛 <strong>GIFT AID REMINDER</strong><br><br>
+      If you pay UK income tax, tick the Gift Aid box on JustGiving's form.
+      Dynamo will receive <strong>£${tierInfo.giftAid.toFixed(2)}</strong> instead of £${amount} —
+      an extra <strong>£${(tierInfo.giftAid - amount).toFixed(2)}</strong> at no cost to you.
+      You must have paid at least ${tierInfo.giftAid.toFixed(2) - amount > 0 ? '' : ''}UK income or capital gains tax equal to the Gift Aid claimed.
+    </div>
+    <button class="processing-cancel" onclick="cancelDonation()">← CHOOSE A DIFFERENT AMOUNT</button>
+  `;
+  document.body.appendChild(overlay);
+
+  // Redirect to JustGiving after 3 seconds (gives time to read Gift Aid reminder)
+  setTimeout(()=>{ redirectToJustGiving(tier, amount); }, 3000);
+}
+
+function cancelDonation() {
+  const ol = document.getElementById('jg-overlay');
+  if (ol) ol.remove();
+}
+
+function redirectToJustGiving(tier, amount) {
+  // Check return URL is configured (charity ID is already set)
+  if (!JG_RETURN_BASE_URL || JG_RETURN_BASE_URL === 'YOUR_HOSTED_URL_HERE') {
+    showJGFallback(tier, amount); return;
+  }
+
+  state.pendingPayment = true; saveState();
+
+  // Build the SDI return URL — JustGiving replaces JUSTGIVING-DONATION-ID automatically
+  const returnUrl = encodeURIComponent(
+    `${JG_RETURN_BASE_URL}?donation=success&tier=${tier}&jgDonationId=JUSTGIVING-DONATION-ID`
+  );
+
+  // Unique reference visible in JustGiving charity reports
+  const ref = encodeURIComponent(`CED-${tier.toUpperCase()}-${state.operativeName}-${Date.now()}`);
+
+  // Pre-filled mission-themed message shown alongside donation on JustGiving
+  const msg = encodeURIComponent(
+    `Donated via Corstorphine Escape Doom — ${TIERS[tier].label} tier. Operative: ${state.operativeName}.`
+  );
+
+  // SDI URL — no App ID required, charity ID 3103399 is pre-configured
+  const jgUrl = `https://link.justgiving.com/v1/charity/donate/charityId/${JG_CHARITY_ID}`
+    + `?donationValue=${amount}`
+    + `&currency=GBP`
+    + `&exiturl=${returnUrl}`
+    + `&reference=${ref}`
+    + `&message=${msg}`;
+
+  window.location.href = jgUrl;
+}
+function showJGFallback(tier, amount) {
+  const ol = document.getElementById('jg-overlay');
+  if (ol) ol.remove();
+
+  const fb = document.createElement('div');
+  fb.className = 'processing-overlay';
+  fb.id = 'jg-fallback';
+  fb.innerHTML = `
+    <div style="font-family:'Oswald',sans-serif;font-size:24px;letter-spacing:3px;color:var(--amber);margin-bottom:10px;">⚠ HOSTED URL NOT SET</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);margin-bottom:20px;line-height:1.7;max-width:300px;">
+      The charity ID <span style="color:var(--dynamo-gold)">3103399</span> is already configured.<br><br>
+      Set <span style="color:var(--dynamo-gold)">JG_RETURN_BASE_URL</span> to the web address where this game is hosted — then JustGiving donations will work live.<br><br>
+      <span style="color:rgba(255,255,255,0.5)">Testing: tap below to simulate a £${amount} ${tier} donation.</span>
+    </div>
+    <button onclick="simulateJGSuccess('${tier}')"
+      style="background:var(--dynamo-gold);border:none;color:var(--dynamo-blue);font-family:'Oswald',sans-serif;font-size:20px;letter-spacing:3px;padding:14px 0;cursor:pointer;width:100%;max-width:300px;margin-bottom:10px;">
+      [TEST] SIMULATE £${amount} + GIFT AID
+    </button>
+    <button onclick="document.getElementById('jg-fallback').remove()"
+      style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.4);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:10px 24px;cursor:pointer;width:100%;max-width:300px;">
+      ← CHOOSE DIFFERENT AMOUNT
+    </button>
+  `;
+  document.body.appendChild(fb);
+}
+
+function simulateJGSuccess(tier) {
+  const fb = document.getElementById('jg-fallback');
+  if (fb) fb.remove();
+  state.donationTier = tier;
+  activateFullAccess();
+}
+
+// Called on page load if returning from JustGiving with ?donation=success
+function checkPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('donation') === 'success') {
+    // Clean URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+    const tier = params.get('tier') || 'supporter';
+    const jgId = params.get('jgDonationId') || '';
+    state.donationTier = tier;
+    state.jgDonationId = jgId; // store for reporting
+    if (state.operativeName && !state.hasPaid) {
+      // Show thank you before unlocking
+      showDonationThankYou(tier, jgId);
+    }
+  }
+}
+
+function showDonationThankYou(tier, jgId) {
+  const tierInfo = TIERS[tier] || TIERS.supporter;
+  const ty = document.createElement('div');
+  ty.className = 'processing-overlay';
+  ty.id = 'ty-overlay';
+  ty.innerHTML = `
+    <div style="font-size:52px;margin-bottom:14px;">🎉</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:30px;letter-spacing:3px;color:var(--green);margin-bottom:8px;">DONATION CONFIRMED</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:20px;letter-spacing:2px;color:var(--dynamo-gold);margin-bottom:16px;">
+      ${tierInfo.label} · £${tierInfo.amount}
+    </div>
+    <div class="processing-gift-aid" style="margin-bottom:16px;">
+      🏛 If you claimed Gift Aid, Corstorphine Dynamo will receive
+      <strong>£${tierInfo.giftAid.toFixed(2)}</strong> — thank you for that extra boost!
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:20px;line-height:1.6;max-width:280px;">
+      JustGiving will email your receipt. Gift Aid is processed by JustGiving on Dynamo's behalf within 30 days.
+      ${jgId ? `Reference: ${jgId}` : ''}
+    </div>
+    <div style="font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:2px;color:var(--text-dim);margin-bottom:8px;">UNLOCKING FULL MISSION…</div>
+  `;
+  document.body.appendChild(ty);
+  setTimeout(()=>{ ty.remove(); activateFullAccess(); }, 3500);
+}
+
+function activateFullAccess() {
+  state.hasPaid = true; state.pendingPayment = false; saveState();
+  flashScreen('green'); showScreen('clues'); loadClue(state.currentClue);
+}
+
+function upgradeSupport() {
+  initiateJGDonation('champion', 10);
+}
+
+// ═══════════════════════════════════════════════
+// GEOLOCATION — BARNTON BUNKER GATE VERIFICATION
+// ═══════════════════════════════════════════════
+// Gate coordinates: 35 Clermiston Road North, Edinburgh EH4 7BN
+const BUNKER_LAT  = 55.9596;   // Barnton Bunker gate latitude
+const BUNKER_LNG  = -3.2769;   // Barnton Bunker gate longitude
+const GEO_RADIUS  = 120;       // metres — generous radius covering car park + gate area
+const GEO_TIMEOUT = 12000;     // ms to wait for GPS fix
+
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000; // Earth radius in metres
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2)
+          + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180)
+          * Math.sin(dLon/2) * Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function showGeoPanel(id) {
+  ['geo-checking','geo-success','geo-toofar','geo-denied'].forEach(p => {
+    document.getElementById(p).style.display = 'none';
+  });
+  document.getElementById(id).style.display = 'flex';
+}
+
+function openGeoOverlay()  {
+  const ov = document.getElementById('geo-overlay');
+  ov.style.display = 'flex';
+}
+function closeGeoOverlay() {
+  document.getElementById('geo-overlay').style.display = 'none';
+}
+
+function checkLocationThenStart() {
+  // Admin bypass — skip geo check
+  if (state.operativeName === 'ADMIN') { startGateQuiz(); return; }
+
+  if (!navigator.geolocation) {
+    // Browser doesn't support geolocation — fall back gracefully
+    openGeoOverlay(); showGeoPanel('geo-denied'); return;
+  }
+
+  openGeoOverlay(); showGeoPanel('geo-checking');
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const dist = Math.round(haversineDistance(
+        pos.coords.latitude, pos.coords.longitude,
+        BUNKER_LAT, BUNKER_LNG
+      ));
+
+      if (dist <= GEO_RADIUS) {
+        // ✅ Close enough — they're at the gates
+        document.getElementById('geo-dist-display').textContent =
+          `📍 ${dist}m from the bunker gates`;
+        showGeoPanel('geo-success');
+        setTimeout(() => { closeGeoOverlay(); startGateQuiz(); }, 2000);
+      } else {
+        // ❌ Too far away
+        const distText = dist >= 1000
+          ? `${(dist/1000).toFixed(1)}km from the bunker gates`
+          : `${dist}m from the bunker gates`;
+        document.getElementById('geo-dist-far').textContent = `📍 You are ${distText}`;
+        showGeoPanel('geo-toofar');
+      }
+    },
+    (err) => {
+      // Permission denied or error
+      showGeoPanel('geo-denied');
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: GEO_TIMEOUT,
+      maximumAge: 0
+    }
+  );
+}
+
+// ═══════════════════════════════════════════════
+// ARM BOMB
+// ═══════════════════════════════════════════════
+let armTimerInterval=null;
+function armBomb() {
+  state.bombArmed=true; state.bombStartTime=Date.now();
+  state.currentQuestion=0; state.correctAnswers=0;
+  saveState();
+
+  // Show tier-based timer info on the armed screen
+  const dur = getBombDuration();
+  const mins = dur / 60;
+  const tierLabels = {'':'No donation — 5 minutes','agent':'Agent (£3) — 7 minutes','supporter':'Supporter (£5) — 10 minutes','champion':'Champion (£10) — 15 minutes'};
+  const tierAdvice = {'':'Donate next time for more time!','agent':'£5 buys 10 mins, £10 buys 15 mins','supporter':'Champion tier gets 15 minutes','champion':'Maximum time — good luck!'};
+  const tier = state.donationTier || '';
+  document.getElementById('tier-timer-label').textContent = `⏱ YOU HAVE ${mins} MINUTES`;
+  document.getElementById('tier-timer-sub').textContent = `${tierLabels[tier]} · ${tierAdvice[tier]}`;
+
+  showScreen('bomb-armed'); startArmCountdown();
+}
+function startArmCountdown() {
+  clearInterval(armTimerInterval); updateArmDisplay();
+  armTimerInterval=setInterval(()=>{ if(getBombRemaining()<=0){clearInterval(armTimerInterval);triggerDetonation();return;} updateArmDisplay(); },500);
+}
+function updateArmDisplay() {
+  const r=Math.max(0,getBombRemaining()); const el=document.getElementById('arm-countdown');
+  el.textContent=formatTime(r); el.className='countdown-display'+(r<=60?' critical':r<=180?' warning':'');
+}
+function getBombRemaining() {
+  if(!state.bombStartTime) return getBombDuration();
+  return getBombDuration()-Math.floor((Date.now()-state.bombStartTime)/1000);
+}
+
+// ═══════════════════════════════════════════════
+// GATE QUIZ
+// ═══════════════════════════════════════════════
+let gateTimerInterval=null;
+function startGateQuiz()  { clearInterval(armTimerInterval); showScreen('gate-quiz'); loadQuestion(state.currentQuestion); startGateTimer(); }
+function resumeGateQuiz() { loadQuestion(state.currentQuestion); startGateTimer(); }
+function startGateTimer() {
+  clearInterval(gateTimerInterval); updateGateDisplay();
+  gateTimerInterval=setInterval(()=>{ if(getBombRemaining()<=0){clearInterval(gateTimerInterval);triggerDetonation();return;} updateGateDisplay(); saveState(); },500);
+}
+function updateGateDisplay() {
+  const r=Math.max(0,getBombRemaining()); const el=document.getElementById('gate-countdown');
+  el.textContent=formatTime(r); el.className='gate-countdown'+(r<=60?' critical':r<=180?' warning':'');
+}
+function loadQuestion(index) {
+  if(index>=GATE_QUESTIONS.length){ clearInterval(gateTimerInterval); showWireScreen(); return; }
+  const q=GATE_QUESTIONS[index];
+  // Gallery for quiz location image — reuse same clue images
+  buildGallery(CLUE_IMAGES[index]||[], 'quiz-img', 'quiz-thumbs');
+  document.getElementById('q-num').textContent=index+1;
+  document.getElementById('gate-prog').style.width=`${(index/GATE_QUESTIONS.length)*100}%`;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-feedback').textContent=''; document.getElementById('q-feedback').className='quiz-feedback';
+  const letters=['A','B','C','D']; const container=document.getElementById('q-options'); container.innerHTML='';
+  q.options.forEach((opt,i)=>{ const btn=document.createElement('button'); btn.className='quiz-opt'; btn.innerHTML=`<span class="opt-letter">${letters[i]}</span>${opt}`; btn.onclick=()=>answerQuestion(i,btn); container.appendChild(btn); });
+}
+function answerQuestion(selectedIndex,btn) {
+  const q=GATE_QUESTIONS[state.currentQuestion]; const feedback=document.getElementById('q-feedback');
+  const allBtns=document.querySelectorAll('.quiz-opt'); allBtns.forEach(b=>b.classList.add('disabled'));
+  if(selectedIndex===q.correct){
+    btn.classList.remove('disabled'); btn.classList.add('selected-correct');
+    feedback.textContent=`✓ CODE ACCEPTED — FRAGMENT ${state.currentQuestion+1} ENTERED`;
+    feedback.className='quiz-feedback ok'; state.correctAnswers++; flashScreen('green');
+    setTimeout(()=>{ state.currentQuestion++; saveState(); loadQuestion(state.currentQuestion); },1000);
+  } else {
+    btn.classList.remove('disabled'); btn.classList.add('selected-wrong');
+    allBtns[q.correct].classList.remove('disabled'); allBtns[q.correct].classList.add('reveal-correct');
+    state.bombStartTime-=(WRONG_PENALTY_SECONDS*1000); saveState();
+    feedback.textContent=`✗ WRONG — −${WRONG_PENALTY_SECONDS}s PENALTY`; feedback.className='quiz-feedback bad'; flashScreen('red');
+    if(getBombRemaining()<=0){setTimeout(()=>{clearInterval(gateTimerInterval);triggerDetonation();},800);return;}
+    setTimeout(()=>{ state.currentQuestion++; saveState(); loadQuestion(state.currentQuestion); },1500);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// WIRE CUTTING — FINAL JEOPARDY
+// ═══════════════════════════════════════════════
+let wireTimerInterval = null;
+const WIRE_SECONDS = 60;
+
+function showWireScreen() {
+  showScreen('wire-cut');
+  // Reset timer display
+  document.getElementById('wire-countdown').textContent = formatTime(WIRE_SECONDS);
+  document.getElementById('wire-countdown').className = 'gate-countdown';
+  // Disable buttons initially — brief dramatic pause
+  document.querySelectorAll('#wire-cut button').forEach(b => b.disabled = true);
+  setTimeout(() => {
+    document.querySelectorAll('#wire-cut button').forEach(b => b.disabled = false);
+  }, 1500);
+  startWireCountdown();
+}
+
+function startWireCountdown() {
+  clearInterval(wireTimerInterval);
+  let remaining = WIRE_SECONDS;
+  wireTimerInterval = setInterval(() => {
+    remaining--;
+    const el = document.getElementById('wire-countdown');
+    el.textContent = formatTime(remaining);
+    el.className = 'gate-countdown' + (remaining <= 10 ? ' critical' : remaining <= 20 ? ' warning' : '');
+    if (remaining <= 0) {
+      clearInterval(wireTimerInterval);
+      // Time ran out — detonation!
+      triggerDetonation();
+    }
+  }, 1000);
+}
+
+function cutWire(colour) {
+  clearInterval(wireTimerInterval);
+  // Disable all wire buttons immediately
+  document.querySelectorAll('#wire-cut button').forEach(b => {
+    b.disabled = true; b.style.opacity = '0.4';
+  });
+
+  if (colour === 'skyblue') {
+    // ✅ CORRECT — sky blue is Dynamo's home kit colour
+    flashScreen('green');
+    // Brief celebration overlay
+    const cel = document.createElement('div');
+    cel.style.cssText = 'position:fixed;inset:0;background:rgba(10,158,86,0.25);z-index:700;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;';
+    cel.innerHTML = `
+      <div style="font-size:64px;margin-bottom:12px;animation:pop-in 0.3s ease;">✂️</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:40px;letter-spacing:4px;color:#fff;text-shadow:0 0 20px rgba(10,158,86,0.8);margin-bottom:8px;">WIRE CUT</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:#6ef0a0;letter-spacing:2px;">SKY BLUE — DYNAMO COLOURS ✓</div>
+    `;
+    document.body.appendChild(cel);
+    setTimeout(() => { cel.remove(); triggerDefused(); }, 2000);
+  } else {
+    // ❌ WRONG WIRE — instant detonation
+    flashScreen('red');
+    const boom = document.createElement('div');
+    boom.style.cssText = 'position:fixed;inset:0;background:rgba(212,32,53,0.35);z-index:700;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;';
+    boom.innerHTML = `
+      <div style="font-size:64px;margin-bottom:12px;">💥</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:40px;letter-spacing:4px;color:#fff;text-shadow:0 0 20px rgba(212,32,53,0.8);margin-bottom:8px;">WRONG WIRE</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:rgba(255,120,120,0.9);letter-spacing:2px;">THE ${colour.toUpperCase()} WIRE WAS A DECOY</div>
+    `;
+    document.body.appendChild(boom);
+    setTimeout(() => { boom.remove(); triggerDetonation(); }, 2000);
+  }
+}
+
+function triggerDefused() {
+  clearInterval(gateTimerInterval); clearInterval(armTimerInterval);
+  const timeLeft=getBombRemaining(); state.timeRemainingAtWin=timeLeft; state.bombArmed=false; saveState();
+  document.getElementById('win-name').textContent=state.operativeName;
+  const tierLabels={agent:'⚡ AGENT',supporter:'🏆 SUPPORTER',champion:'🌟 CHAMPION',''  :'—'};
+  document.getElementById('win-tier').textContent=tierLabels[state.donationTier]||'—';
+  document.getElementById('win-time').textContent=formatTime(timeLeft);
+  document.getElementById('win-codes').textContent=`${state.correctAnswers} / ${GATE_QUESTIONS.length}`;
+  document.getElementById('gate-prog').style.width='100%';
+  // Show upgrade upsell only if they didn't already choose Champion
+  if (state.donationTier && state.donationTier!=='champion') {
+    document.getElementById('win-upsell').style.display='block';
+  }
+  showScreen('defused');
+}
+
+function triggerDetonation() {
+  clearInterval(gateTimerInterval); clearInterval(armTimerInterval);
+  state.bombArmed=false; saveState();
+  document.getElementById('det-score-val').textContent=`${state.correctAnswers} / ${GATE_QUESTIONS.length}`;
+  flashScreen('red'); setTimeout(()=>showScreen('detonation'),300);
+}
+
+function retryGate() {
+  clearInterval(wireTimerInterval);
+  state.bombStartTime=Date.now()-(getBombDuration()-180)*1000;
+  state.bombArmed=true; state.currentQuestion=0; state.correctAnswers=0; saveState();
+  showScreen('gate-quiz'); loadQuestion(0); startGateTimer();
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function formatTime(s) { const m=Math.floor(s/60),sec=s%60; return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
+function flashScreen(c) { const el=document.createElement('div'); el.className=c==='green'?'flash-green':'flash-red'; document.body.appendChild(el); setTimeout(()=>el.remove(),500); }
+
+function shareVictory() {
+  const tierMsg = state.donationTier==='champion' ? 'I became a Dynamo Champion! 🌟' : state.donationTier==='supporter' ? 'I supported Dynamo FC! 🏆' : '';
+  const text=`💣 DEFUSED! Completed Corstorphine Escape Doom with ${formatTime(state.timeRemainingAtWin||0)} remaining as ${state.operativeName}. ${tierMsg} Can your team beat the clock? #CorstorphineEscapeDoom #DynamoFC`;
+  if(navigator.share) navigator.share({title:'Corstorphine Escape Doom',text});
+  else navigator.clipboard?.writeText(text).then(()=>alert('Debrief copied to clipboard!'));
+}
+
+function restartGame() {
+  clearInterval(gateTimerInterval); clearInterval(armTimerInterval); clearInterval(wireTimerInterval);
+  state={operativeName:'',email:'',pin:'',currentClue:0,hasPaid:false,donationTier:'',
+         bombArmed:false,bombStartTime:null,currentQuestion:0,correctAnswers:0,selectedTierAmount:5};
+  try{localStorage.removeItem('ced_state');}catch(e){}
+  showScreen('boot');
+}
+
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.getElementById('clues').classList.contains('active')) submitClueAnswer(); });
+
+// ═══════════════════════════════════════════════
+// BOOT INIT
+// ═══════════════════════════════════════════════
+loadState();
+checkPaymentReturn();
+if(state.operativeName){
+  const btn=document.createElement('button');
+  btn.className='btn-secondary';
+  btn.style.cssText='max-width:340px;margin-top:10px;border-color:var(--red);color:var(--red);';
+  btn.textContent=`▶ RESUME AS ${state.operativeName}`;
+  btn.onclick=()=>startMission();
+  document.querySelector('.boot-body').appendChild(btn);
+}
+</script>
+</body>
+</html>
